@@ -1,6 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+
+// Create a custom driver marker icon
+const driverIcon = new L.Icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/3206/3206015.png',
+  iconSize: [40, 40],
+  iconAnchor: [20, 20]
+});
 
 const RideRequest = () => {
   const location = useLocation();
@@ -9,8 +19,26 @@ const RideRequest = () => {
   const [rideType, setRideType] = useState('UgoX');
   const [fareStatus, setFareStatus] = useState(null); // null, 'calculating', 'calculated', 'requested'
   const [estimatedFare, setEstimatedFare] = useState(0);
+  const [driverPosition, setDriverPosition] = useState(null); // Will store [lat, lng]
   
   const navigate = useNavigate();
+
+  // Jaipur coordinates
+  const defaultMapCenter = [26.9124, 75.7873];
+
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const socket = io(API_URL);
+
+    socket.on('driverLocationUpdate', (data) => {
+      // Assuming data contains { lat, lng }
+      if (data && data.lat && data.lng) {
+        setDriverPosition([data.lat, data.lng]);
+      }
+    });
+
+    return () => socket.disconnect();
+  }, []);
 
   const handleCalculateFare = (e) => {
     e.preventDefault();
@@ -21,7 +49,7 @@ const RideRequest = () => {
     // Simulate API delay for fare calculation
     setTimeout(() => {
       const mockDistance = Math.abs(pickup.length - dropoff.length) + 5;
-      const baseFare = mockDistance * 2.5;
+      const baseFare = mockDistance * 50; // ₹50 per km
       let multiplier = 1;
       
       if(rideType === 'UgoXL') multiplier = 1.5;
@@ -74,6 +102,7 @@ const RideRequest = () => {
                 value={pickup}
                 onChange={(e) => setPickup(e.target.value)}
                 style={{ paddingLeft: '2.5rem' }}
+                list="jaipur-locations"
                 required
               />
               <div style={{ position: 'absolute', left: '19px', top: '35px', width: '1px', height: '25px', background: 'rgba(255,255,255,0.2)' }}></div>
@@ -87,9 +116,22 @@ const RideRequest = () => {
                 value={dropoff}
                 onChange={(e) => setDropoff(e.target.value)}
                 style={{ paddingLeft: '2.5rem' }}
+                list="jaipur-locations"
                 required
               />
             </div>
+
+            <datalist id="jaipur-locations">
+               <option value="Hawa Mahal" />
+               <option value="Amer Fort" />
+               <option value="City Palace" />
+               <option value="Albert Hall Museum" />
+               <option value="Jantar Mantar" />
+               <option value="Patrika Gate" />
+               <option value="Jaipur Railway Station" />
+               <option value="Jaipur International Airport" />
+               <option value="Jal Mahal" />
+            </datalist>
 
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
               {['UgoX', 'UgoXL', 'UgoBlack'].map(type => (
@@ -117,7 +159,7 @@ const RideRequest = () => {
               <div className="animate-in">
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                     <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{rideType}</span>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00e676' }}>${estimatedFare}</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00e676' }}>₹{estimatedFare}</span>
                  </div>
                  <button type="button" onClick={handleRequestRide} className="btn-primary" style={{ width: '100%' }}>Confirm {rideType}</button>
               </div>
@@ -128,11 +170,18 @@ const RideRequest = () => {
         </div>
 
         {/* Right Map Side */}
-        <div className="map-container" style={{ height: '70vh' }}>
-            <h1 style={{ color: 'rgba(255,255,255,0.15)', textAlign: 'center' }}>
-              Interactive Map<br/>
-              <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>Google Maps / Mapbox</span>
-            </h1>
+        <div className="map-container" style={{ height: '70vh', borderRadius: '16px', overflow: 'hidden' }}>
+            <MapContainer center={defaultMapCenter} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              />
+              {driverPosition && (
+                <Marker position={driverPosition} icon={driverIcon}>
+                  <Popup>Driver is here</Popup>
+                </Marker>
+              )}
+            </MapContainer>
         </div>
 
       </div>

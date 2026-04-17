@@ -10,8 +10,8 @@ const Home = () => {
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
 
-  // Default to San Francisco
-  const position = [37.7749, -122.4194];
+  // Default to Jaipur
+  const position = [26.9124, 75.7873];
 
   const handleRequestRide = (e) => {
     e.preventDefault();
@@ -40,6 +40,18 @@ const Home = () => {
            <div className="glass-card booking-card">
               <h2 className="hero-heading">Go anywhere with <br />Ugo</h2>
              
+             <datalist id="jaipur-locations">
+               <option value="Hawa Mahal" />
+               <option value="Amer Fort" />
+               <option value="City Palace" />
+               <option value="Albert Hall Museum" />
+               <option value="Jantar Mantar" />
+               <option value="Patrika Gate" />
+               <option value="Jaipur Railway Station" />
+               <option value="Jaipur International Airport" />
+               <option value="Jal Mahal" />
+             </datalist>
+             
              <form onSubmit={handleRequestRide}>
                 <div className="input-group">
                    <div className="input-icon-container line-down">
@@ -50,6 +62,7 @@ const Home = () => {
                       placeholder="Pickup location" 
                       value={pickup} 
                       onChange={e => setPickup(e.target.value)} 
+                      list="jaipur-locations"
                       required                    />
                     <button type="button" className="locate-btn" title="Use current location">
                        <Navigation size={18} />
@@ -65,6 +78,7 @@ const Home = () => {
                       placeholder="Dropoff destination" 
                       value={dropoff} 
                       onChange={e => setDropoff(e.target.value)} 
+                      list="jaipur-locations"
                       required 
                    />
                 </div>

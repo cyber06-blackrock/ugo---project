@@ -62,7 +62,7 @@ const Package = () => {
             <li><span className="rules-icon">🔑</span> Forgotten keys or personal items</li>
           </ul>
           <p style={{ color: '#aaaaaa', fontSize: '0.9rem', marginTop: '1rem' }}>
-            *Items must be worth less than $100. Prohibited items include alcohol, medication, recreational drugs, and dangerous/illegal items.
+            *Items must be worth less than ₹8000. Prohibited items include alcohol, medication, recreational drugs, and dangerous/illegal items.
           </p>
         </div>
         <div className="rules-image"></div>

@@ -26,7 +26,7 @@ const Sustainability = () => {
           <div className="timeline-item">
             <div className="timeline-year">2025</div>
             <h3>Hundreds of thousands of EVs</h3>
-            <p>Commitment to allocate $800M+ in resources to help hundreds of thousands of drivers transition to electric vehicles in the US, Canada, and Europe.</p>
+            <p>Commitment to allocate ₹6600 Crore+ in resources to help hundreds of thousands of drivers transition to electric vehicles in the US, Canada, Europe, and India.</p>
           </div>
           
           <div className="timeline-item">
