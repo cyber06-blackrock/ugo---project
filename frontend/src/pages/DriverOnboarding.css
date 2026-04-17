@@ -1,0 +1,78 @@
+/* ═══════════════════════════════════════
+   DRIVER ONBOARDING PAGE
+   Mobile-First
+═══════════════════════════════════════ */
+
+.do-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.do-card {
+  padding: 1.5rem;
+}
+
+.do-title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.do-subtitle {
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.do-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.do-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: 1 column */
+  gap: 1rem;
+}
+
+.do-section-title {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.do-submit-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+}
+
+/* Tablet & Desktop */
+@media (min-width: 768px) {
+  .do-page {
+    margin-top: 3rem;
+  }
+  
+  .do-card {
+    padding: 2.5rem;
+  }
+
+  .do-title {
+    font-size: 2.5rem;
+  }
+
+  .do-subtitle {
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .do-grid {
+    grid-template-columns: 1fr 1fr; /* Desktop: 2 columns */
+  }
+
+  .do-section-title {
+    margin: 1.5rem 0 1rem 0;
+    font-size: 1.2rem;
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
-import { Car, Package, Navigation, ArrowRight, Briefcase, Home as HomeIcon, Map, Shield, CreditCard, Calendar, QrCode } from 'lucide-react';
+import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
 import './Home.css';
 
 const Home = () => {
@@ -11,8 +11,7 @@ const Home = () => {
   const [dropoff, setDropoff] = useState('');
   const [historyLocations, setHistoryLocations] = useState([]);
 
-  // Default to Jaipur
-  const position = [26.9124, 75.7873];
+  const position = [26.9124, 75.7873]; // Jaipur
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -24,8 +23,6 @@ const Home = () => {
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const res = await fetch(`${API_URL}/api/rides/history/${user._id}`);
             const data = await res.json();
-            
-            // Extract unique locations
             const locations = new Set();
             data.forEach(ride => {
               if (ride.pickupLocation?.address) locations.add(ride.pickupLocation.address);
@@ -35,7 +32,7 @@ const Home = () => {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch history:", err);
+        console.error('Failed to fetch history:', err);
       }
     };
     fetchHistory();
@@ -50,171 +47,161 @@ const Home = () => {
 
   return (
     <div className="home-container animate-in">
-      {/* Hero section with Form and Map */}
+
+      {/* ── Hero: Map + Booking Sidebar ── */}
       <div className="home-content">
-        <div className="home-sidebar">
-           {/* Navigation Tabs */}
-           <div className="tabs">
-              <button className={activeTab === 'ride' ? 'tab active' : 'tab'} onClick={() => setActiveTab('ride')}>
-                 <Car size={32} className="tab-icon" />
-                 Ride
-              </button>
-              <button className={activeTab === 'package' ? 'tab active' : 'tab'} onClick={() => setActiveTab('package')}>
-                 <Package size={32} className="tab-icon" />
-                 Package
-              </button>
-           </div>
-           
-           <div className="glass-card booking-card">
-              <h2 className="hero-heading">Go anywhere with <br />Ugo</h2>
-             
-             <datalist id="jaipur-locations">
-               {historyLocations.map((loc, idx) => (
-                 <option key={`hist-${idx}`} value={loc} />
-               ))}
-               <option value="Hawa Mahal" />
-               <option value="Amer Fort" />
-               <option value="City Palace" />
-               <option value="Albert Hall Museum" />
-               <option value="Jantar Mantar" />
-               <option value="Patrika Gate" />
-               <option value="Jaipur Railway Station" />
-               <option value="Jaipur International Airport" />
-               <option value="Jal Mahal" />
-             </datalist>
-             
-             <form onSubmit={handleRequestRide}>
-                <div className="input-group">
-                   <div className="input-icon-container line-down">
-                     <div className="dot"></div>
-                   </div>
-                   <input 
-                      type="text" 
-                      placeholder="Pickup location" 
-                      value={pickup} 
-                      onChange={e => setPickup(e.target.value)} 
-                      list="jaipur-locations"
-                      required                    />
-                    <button type="button" className="locate-btn" title="Use current location">
-                       <Navigation size={18} />
-                    </button>
-                </div>
-                
-                <div className="input-group">
-                   <div className="input-icon-container">
-                     <div className="square"></div>
-                   </div>
-                   <input 
-                      type="text" 
-                      placeholder="Dropoff destination" 
-                      value={dropoff} 
-                      onChange={e => setDropoff(e.target.value)} 
-                      list="jaipur-locations"
-                      required 
-                   />
-                </div>
-                
-                <button type="submit" className="btn-secondary w-100" style={{ marginTop: '1rem' }}>
-                   See prices
-                </button>
-             </form>
-
-             <div className="quick-actions">
-               <div className="action-btn">
-                 <div className="action-icon-wrapper"><HomeIcon size={20} /></div>
-                 <span>Home</span>
-               </div>
-               <div className="action-btn">
-                 <div className="action-icon-wrapper"><Briefcase size={20} /></div>
-                 <span>Work</span>
-               </div>
-             </div>
-           </div>
-        </div>
-
+        {/* Map first on mobile (order-1), sidebar slides over it */}
         <div className="home-map">
           <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
           </MapContainer>
         </div>
-      </div>
 
-      {/* Info Sections Below Hero */}
-      <div className="info-section">
-        {/* Suggestions Grid */}
-        <h2 className="section-title">Suggestions</h2>
-        <div className="cards-grid" style={{ marginBottom: '4rem', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
-           <div className="info-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/request-ride')}>
-              <div className="card-icon-wrapper" style={{ background: 'var(--surface)', padding: '1rem', borderRadius: '12px', display: 'inline-block' }}>
-                 <Car size={32} color="var(--text-primary)" />
-              </div>
-              <h3 style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>Ride</h3>
-              <p style={{ fontSize: '0.9rem' }}>Go anywhere with Ugo</p>
-           </div>
-           
-           <div className="info-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/reserve')}>
-              <div className="card-icon-wrapper" style={{ background: 'var(--surface)', padding: '1rem', borderRadius: '12px', display: 'inline-block' }}>
-                 <Calendar size={32} color="var(--text-primary)" />
-              </div>
-              <h3 style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>Reserve</h3>
-              <p style={{ fontSize: '0.9rem' }}>Reserve a ride in advance</p>
-           </div>
-           
-           <div className="info-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/package')}>
-              <div className="card-icon-wrapper" style={{ background: 'var(--surface)', padding: '1rem', borderRadius: '12px', display: 'inline-block' }}>
-                 <Package size={32} color="var(--text-primary)" />
-              </div>
-              <h3 style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>Package</h3>
-              <p style={{ fontSize: '0.9rem' }}>Ugo Connect delivery</p>
-           </div>
-        </div>
+        <div className="home-sidebar">
+          {/* Tabs */}
+          <div className="tabs">
+            <button className={activeTab === 'ride' ? 'tab active' : 'tab'} onClick={() => setActiveTab('ride')}>
+              <span className="tab-icon"><Car size={24} /></span>
+              Ride
+            </button>
+            <button className={activeTab === 'package' ? 'tab active' : 'tab'} onClick={() => setActiveTab('package')}>
+              <span className="tab-icon"><Package size={24} /></span>
+              Package
+            </button>
+          </div>
 
-        {/* Marketing Promo 1: Drive */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '4rem', alignItems: 'center', marginBottom: '6rem' }}>
-          <div>
-            <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '1.5rem', lineHeight: 1.1 }}>Drive when you want, make what you need</h2>
-            <p style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>Make money on your schedule with deliveries or rides—or both. You can use your own car or choose a rental through Ugo.</p>
-            <div style={{ display: 'flex', gap: '1.5rem' }}>
-               <button className="btn-secondary" onClick={() => navigate('/driver-onboarding')}>Get started</button>
-               <button style={{ background: 'transparent', color: 'var(--text-primary)', border: 'none', fontSize: '1.1rem', textDecoration: 'underline', cursor: 'pointer' }}>Already have an account? Sign in</button>
+          {/* Booking card */}
+          <div className="booking-card">
+            <h2 className="hero-heading">Go anywhere with<br />Ugo</h2>
+
+            <datalist id="jaipur-locations">
+              {historyLocations.map((loc, idx) => <option key={idx} value={loc} />)}
+              <option value="Hawa Mahal" /><option value="Amer Fort" />
+              <option value="City Palace" /><option value="Albert Hall Museum" />
+              <option value="Jantar Mantar" /><option value="Patrika Gate" />
+              <option value="Jaipur Railway Station" /><option value="Jaipur International Airport" />
+              <option value="Jal Mahal" />
+            </datalist>
+
+            <form onSubmit={handleRequestRide}>
+              <div className="input-group">
+                <span className="input-dot dot" />
+                <input
+                  type="text"
+                  placeholder="Pickup location"
+                  value={pickup}
+                  onChange={e => setPickup(e.target.value)}
+                  list="jaipur-locations"
+                  required
+                />
+                <button type="button" className="locate-btn" title="Use current location">
+                  <Navigation size={16} />
+                </button>
+              </div>
+
+              <div className="input-group">
+                <span className="input-dot square" />
+                <input
+                  type="text"
+                  placeholder="Dropoff destination"
+                  value={dropoff}
+                  onChange={e => setDropoff(e.target.value)}
+                  list="jaipur-locations"
+                  required
+                />
+              </div>
+
+              <button type="submit" className="see-prices-btn">
+                See prices
+              </button>
+            </form>
+
+            <div className="quick-actions">
+              <div className="action-btn">
+                <div className="action-icon-wrapper"><HomeIcon size={18} /></div>
+                <span>Home</span>
+              </div>
+              <div className="action-btn">
+                <div className="action-icon-wrapper"><Briefcase size={18} /></div>
+                <span>Work</span>
+              </div>
             </div>
           </div>
-          <div style={{ height: '400px', background: 'url(https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800) center/cover', borderRadius: '16px' }}></div>
         </div>
+      </div>
 
-        {/* Marketing Promo 2: Business */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr minmax(300px, 1fr)', gap: '4rem', alignItems: 'center', marginBottom: '6rem' }}>
-          <div style={{ height: '400px', background: 'url(https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&q=80&w=800) center/cover', borderRadius: '16px' }}></div>
-          <div>
-            <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '1.5rem', lineHeight: 1.1 }}>The Ugo you know, reimagined for business</h2>
-            <p style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>A platform for managing global rides and meals, and local deliveries, for companies of any size.</p>
-            <button className="btn-secondary">Check out our solutions</button>
+      {/* ── Info Sections ── */}
+      <div className="info-section">
+        <h2 className="section-title">Suggestions</h2>
+        <div className="cards-grid">
+          <div className="info-card" onClick={() => navigate('/request-ride')}>
+            <div className="card-icon-wrapper"><Car size={30} /></div>
+            <h3>Ride</h3>
+            <p>Go anywhere with Ugo</p>
+          </div>
+          <div className="info-card" onClick={() => navigate('/reserve')}>
+            <div className="card-icon-wrapper"><Calendar size={30} /></div>
+            <h3>Reserve</h3>
+            <p>Reserve a ride in advance</p>
+          </div>
+          <div className="info-card" onClick={() => navigate('/package')}>
+            <div className="card-icon-wrapper"><Package size={30} /></div>
+            <h3>Package</h3>
+            <p>Ugo Connect delivery</p>
           </div>
         </div>
 
-        {/* Marketing Promo 3: Rent your car */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '4rem', alignItems: 'center', marginBottom: '6rem' }}>
-          <div>
-            <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '1.5rem', lineHeight: 1.1 }}>Make money by renting out your car</h2>
-            <p style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>Connect with thousands of drivers and earn more per week with Ugo’s free fleet management tools.</p>
-            <button className="btn-secondary">Get started</button>
+        {/* Promo: Drive */}
+        <div className="promo-row">
+          <div className="promo-text">
+            <h2>Drive when you want,<br />make what you need</h2>
+            <p>Make money on your schedule with deliveries or rides—or both. You can use your own car or choose a rental through Ugo.</p>
+            <div className="promo-actions">
+              <button className="btn-secondary" onClick={() => navigate('/driver-onboarding')}>Get started</button>
+              <button className="btn-ghost">Already have an account? Sign in</button>
+            </div>
           </div>
-          <div style={{ height: '400px', background: 'url(https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800) center/cover', borderRadius: '16px' }}></div>
+          <div className="promo-img" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800)" }} />
         </div>
 
-        {/* Marketing Promo 4: Plan for later */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr minmax(300px, 1fr)', gap: '4rem', alignItems: 'center', marginBottom: '6rem' }}>
-          <div style={{ height: '400px', background: 'url(https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=800) center/cover', borderRadius: '16px' }}></div>
-          <div>
-            <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '1.5rem', lineHeight: 1.1 }}>Plan for a later ride</h2>
-            <p style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>Going to the airport? Want to secure a ride in advance? Reserve your ride up to 90 days ahead with Ugo Reserve.</p>
-            <button className="btn-secondary">Reserve a ride</button>
+        {/* Promo: Business (reversed) */}
+        <div className="promo-row promo-row--reverse">
+          <div className="promo-img" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&q=80&w=800)" }} />
+          <div className="promo-text">
+            <h2>The Ugo you know,<br />reimagined for business</h2>
+            <p>A platform for managing global rides and meals, and local deliveries, for companies of any size.</p>
+            <div className="promo-actions">
+              <button className="btn-secondary" onClick={() => navigate('/business')}>Check out our solutions</button>
+            </div>
           </div>
         </div>
 
+        {/* Promo: Rent your car */}
+        <div className="promo-row">
+          <div className="promo-text">
+            <h2>Make money by renting out your car</h2>
+            <p>Connect with thousands of drivers and earn more per week with Ugo's free fleet management tools.</p>
+            <div className="promo-actions">
+              <button className="btn-secondary">Get started</button>
+            </div>
+          </div>
+          <div className="promo-img" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800)" }} />
+        </div>
+
+        {/* Promo: Plan for later (reversed) */}
+        <div className="promo-row promo-row--reverse">
+          <div className="promo-img" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=800)" }} />
+          <div className="promo-text">
+            <h2>Plan for a later ride</h2>
+            <p>Going to the airport? Want to secure a ride in advance? Reserve your ride up to 90 days ahead with Ugo Reserve.</p>
+            <div className="promo-actions">
+              <button className="btn-secondary" onClick={() => navigate('/reserve')}>Reserve a ride</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

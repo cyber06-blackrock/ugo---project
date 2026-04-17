@@ -303,3 +303,63 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .reserve-hero {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .reserve-booking {
+    padding: 4rem 1.5rem;
+  }
+
+  .reserve-features {
+    padding: 4rem 1.5rem;
+  }
+
+  .reserve-how {
+    padding: 4rem 1.5rem;
+  }
+
+  .reserve-final-cta {
+    padding: 4rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reserve-hero-title {
+    font-size: clamp(2.2rem, 9vw, 3.5rem);
+    letter-spacing: -0.5px;
+  }
+
+  .reserve-hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .reserve-hero-image-wrapper {
+    height: 260px;
+  }
+
+  .reserve-form {
+    padding: 1.5rem 1rem;
+  }
+
+  .reserve-booking h2,
+  .reserve-how h2,
+  .reserve-final-cta h2 {
+    font-size: 1.6rem;
+  }
+
+  .reserve-cta-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 0.9rem 1rem;
+  }
+
+  .reserve-step {
+    padding: 2rem 1.5rem;
+  }
+}

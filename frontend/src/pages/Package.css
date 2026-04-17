@@ -230,3 +230,66 @@
     min-height: 400px;
   }
 }
+
+@media (max-width: 768px) {
+  .package-hero {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .package-steps {
+    padding: 4rem 1.5rem;
+  }
+
+  .package-final {
+    padding: 4rem 1.5rem;
+  }
+
+  .rules-content {
+    padding: 4rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .package-hero-title {
+    font-size: clamp(2.2rem, 9vw, 3.5rem);
+    letter-spacing: -0.5px;
+  }
+
+  .package-hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .package-hero-image-wrapper {
+    height: 260px;
+  }
+
+  .package-cta-group {
+    flex-direction: column;
+  }
+
+  .package-btn-primary {
+    width: 100%;
+    text-align: center;
+    padding: 0.9rem 1rem;
+  }
+
+  .package-section-title,
+  .rules-content h2,
+  .package-final h2 {
+    font-size: 1.6rem;
+  }
+
+  .package-final p {
+    font-size: 1rem;
+  }
+
+  .rules-list li {
+    font-size: 1rem;
+  }
+
+  .step-card {
+    padding: 2rem 1.5rem;
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './DriverOnboarding.css';
 
 const DriverOnboarding = () => {
   const [formData, setFormData] = useState({
@@ -46,13 +47,13 @@ const DriverOnboarding = () => {
   };
 
   return (
-    <div className="container animate-in" style={{ maxWidth: '600px', marginTop: '3rem' }}>
-      <div className="glass-card">
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Drive with Ugo</h1>
-        <p style={{ marginBottom: '2rem' }}>Sign up to be a driver, earn on your schedule, and explore the city.</p>
+    <div className="container animate-in do-page">
+      <div className="glass-card do-card">
+        <h1 className="do-title">Drive with Ugo</h1>
+        <p className="do-subtitle">Sign up to be a driver, earn on your schedule, and explore the city.</p>
         
-        <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className="do-form">
+          <div className="do-grid">
             <input 
               name="name" type="text" placeholder="Full Name" required 
               onChange={handleChange} value={formData.name}
@@ -68,9 +69,9 @@ const DriverOnboarding = () => {
             onChange={handleChange} value={formData.password}
           />
           
-          <h3 style={{ margin: '1.5rem 0 1rem 0', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>Vehicle Details</h3>
+          <h3 className="do-section-title">Vehicle Details</h3>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="do-grid">
             <input 
               name="carMake" type="text" placeholder="Make (e.g. Toyota)" required 
               onChange={handleChange} value={formData.carMake}
@@ -88,8 +89,7 @@ const DriverOnboarding = () => {
 
           <button 
             type="submit" 
-            className="btn-accent" 
-            style={{ width: '100%', marginTop: '1rem', padding: '1.2rem', fontSize: '1.1rem' }}
+            className="btn-accent do-submit-btn" 
             disabled={loading}
           >
             {loading ? 'Creating account...' : 'Complete Sign Up'}

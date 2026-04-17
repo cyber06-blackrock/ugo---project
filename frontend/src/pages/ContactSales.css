@@ -180,3 +180,40 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .contact-sales-page {
+    padding: 2rem 1rem;
+    align-items: flex-start;
+  }
+
+  .contact-info-panel {
+    padding: 2rem 1.25rem;
+  }
+
+  .contact-info-panel h1 {
+    font-size: 2rem;
+  }
+
+  .contact-form-panel {
+    padding: 2rem 1.25rem;
+  }
+
+  .contact-form-panel h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-submit-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  .contact-feature {
+    gap: 1rem;
+  }
+
+  .feature-icon {
+    padding: 0.65rem;
+    font-size: 1.2rem;
+  }
+}

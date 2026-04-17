@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const [status, setStatus] = useState('offline');
@@ -37,21 +38,18 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="container animate-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div className="container animate-in db-page">
+      <div className="db-header">
         <h2>Driver Dashboard</h2>
-        <div>
-          <span style={{ 
-            display: 'inline-block', width: '12px', height: '12px', borderRadius: '50%', 
-            background: status === 'online' ? '#00e676' : '#ff1744', marginRight: '8px' 
-          }}></span>
-          <span style={{ textTransform: 'capitalize', fontWeight: 'bold' }}>{status}</span>
+        <div className="db-status-container">
+          <span className={`db-status-dot ${status === 'online' ? 'online' : 'offline'}`}></span>
+          <span className="db-status-text">{status}</span>
         </div>
       </div>
 
-      <div className="glass-card" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h3 style={{ marginBottom: '0.5rem' }}>Toggle Availability</h3>
+      <div className="glass-card db-toggle-card">
+        <div className="db-toggle-text">
+          <h3>Toggle Availability</h3>
           <p>Go online to start receiving ride requests.</p>
         </div>
         <button 
@@ -62,20 +60,20 @@ const Dashboard = () => {
         </button>
       </div>
 
-      <div className="map-container" style={{ marginBottom: '2rem' }}>
-         <h1 style={{ color: 'rgba(255,255,255,0.2)' }}>Live Map Tracking</h1>
+      <div className="map-container db-map">
+         <h1>Live Map Tracking</h1>
       </div>
 
       <h2>Recent Requests</h2>
       {rideRequests.length === 0 ? (
-        <p style={{ marginTop: '1rem' }}>No new ride requests right now.</p>
+        <p className="db-no-requests">No new ride requests right now.</p>
       ) : (
         <div className="card-grid">
           {rideRequests.map((req, idx) => (
              <div key={idx} className="glass-card">
                <h4>{req.pickup} to {req.dropoff}</h4>
-               <p style={{ marginTop: '1rem', color: '#00e676', fontWeight: 'bold' }}>{req.fare}</p>
-               <button className="btn-accent" style={{ marginTop: '1rem', width: '100%' }}>Accept Ride</button>
+               <p className="db-fare">{req.fare}</p>
+               <button className="btn-accent db-accept-btn">Accept Ride</button>
              </div>
           ))}
         </div>

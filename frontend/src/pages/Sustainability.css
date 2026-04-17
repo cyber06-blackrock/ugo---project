@@ -207,3 +207,64 @@
     height: 300px;
   }
 }
+
+@media (max-width: 768px) {
+  .sustain-hero {
+    height: 55vh;
+    min-height: 360px;
+    padding: 0 1.5rem;
+  }
+
+  .sustain-goals-timeline {
+    padding: 4rem 1.5rem;
+  }
+
+  .sustain-section-title {
+    font-size: 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .sustain-pillars {
+    padding: 4rem 1.5rem;
+  }
+
+  .sustain-cta {
+    padding: 4rem 1.5rem;
+  }
+
+  .sustain-cta h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sustain-hero {
+    height: 50vh;
+    min-height: 300px;
+  }
+
+  .sustain-hero-title {
+    font-size: clamp(2.2rem, 9vw, 3.5rem);
+  }
+
+  .sustain-hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .timeline-item {
+    padding: 2rem 1.25rem;
+  }
+
+  .timeline-year {
+    font-size: 2.2rem;
+  }
+
+  .sustain-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .pillar-content h3 {
+    font-size: 1.6rem;
+  }
+}

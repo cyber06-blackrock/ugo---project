@@ -1,0 +1,202 @@
+/* ═══════════════════════════════════════
+   RIDE REQUEST PAGE
+   Mobile-First
+═══════════════════════════════════════ */
+
+.rr-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Form Panel */
+.rr-form-panel {
+  width: 100%;
+}
+
+.rr-title {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.rr-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rr-input-wrap {
+  position: relative;
+}
+
+.rr-dot {
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.rr-dot--white {
+  background: #ffffff;
+  border: 2px solid #cccccc;
+}
+
+.rr-dot--accent {
+  background: var(--accent-color);
+  border-radius: 2px; /* Square for dropoff */
+}
+
+/* Connecting line */
+.rr-input-wrap:first-child::after {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 30px;
+  width: 2px;
+  height: calc(100% + 5px);
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.rr-input-wrap input {
+  padding-left: 2.8rem;
+}
+
+.rr-type-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap; /* allow wrapping on small screens */
+}
+
+.rr-type-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.8rem;
+  background: var(--surface-h);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rr-type-btn--active {
+  background: var(--text-primary);
+  color: #ffffff;
+}
+
+.rr-action-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+}
+
+.rr-disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Fare display */
+.rr-fare {
+  background: var(--surface-h);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.rr-fare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.rr-fare-type {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.rr-fare-amt {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #00a854; /* Ugo Green */
+}
+
+/* Tracking Display */
+.rr-tracking {
+  padding: 1.5rem;
+  background: var(--surface-h);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.rr-tracking-title {
+  color: #00a854;
+  margin-bottom: 0.5rem;
+  font-size: 1.4rem;
+}
+
+.rr-metrics {
+  display: flex;
+  justify-content: space-around;
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.rr-metrics span {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+
+.rr-metrics strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* Map Panel */
+.rr-map-panel {
+  height: 50vh;
+  min-height: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Tablet & Desktop */
+@media (min-width: 768px) {
+  .rr-page {
+    flex-direction: row;
+    padding: 2rem;
+    height: calc(100vh - 80px);
+    align-items: flex-start;
+  }
+  
+  .rr-form-panel {
+    flex: 1;
+    max-width: 450px;
+    position: sticky;
+    top: 2rem;
+  }
+  
+  .rr-map-panel {
+    flex: 2;
+    height: 100%;
+    min-height: 500px;
+  }
+}

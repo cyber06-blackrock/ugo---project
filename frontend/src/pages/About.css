@@ -224,3 +224,68 @@
     padding: 4rem 2rem;
   }
 }
+
+@media (max-width: 768px) {
+  .about-hero {
+    height: 60vh;
+    min-height: 360px;
+  }
+
+  .about-vision {
+    padding: 4rem 1.5rem;
+  }
+
+  .about-vision h2 {
+    font-size: 1.8rem;
+  }
+
+  .about-vision p {
+    font-size: 1.1rem;
+  }
+
+  .about-values {
+    padding: 4rem 1.5rem;
+  }
+
+  .about-stats {
+    padding: 4rem 1.5rem;
+  }
+
+  .stat-number {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero {
+    height: 50vh;
+    min-height: 300px;
+  }
+
+  .about-values-header,
+  .sustain-section-title {
+    font-size: 1.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .value-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+  }
+
+  .sustainability-content {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .sustainability-content h2 {
+    font-size: 1.8rem;
+  }
+}
