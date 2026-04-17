@@ -1,4 +1,4 @@
-const Ride = require('../Models/Ride');
+const Ride = require('../Models/ride');
 
 // @desc    Calculate fare and create a ride request
 // @route   POST /api/rides/request
