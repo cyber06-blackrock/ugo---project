@@ -1,0 +1,232 @@
+.package-page {
+  font-family: 'Inter', 'Outfit', sans-serif;
+  color: var(--text-primary, #121212);
+  background-color: var(--bg-primary, #ffffff);
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.package-hero {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary, #ffffff);
+  padding: 0 8%;
+}
+
+.package-hero-content {
+  flex: 1;
+  max-width: 650px;
+  z-index: 2;
+  animation: slideInLeft 1s ease-out forwards;
+}
+
+.package-hero-title {
+  font-size: clamp(3.5rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -1.5px;
+  color: var(--text-primary, #000000);
+}
+
+.package-hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 2.5rem;
+  color: #555555;
+  line-height: 1.5;
+}
+
+.package-cta-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.package-btn-primary {
+  padding: 1rem 2rem;
+  background: #000000;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid #000000;
+}
+
+.package-btn-primary:hover {
+  background: #333333;
+  border-color: #333333;
+}
+
+.package-hero-image-wrapper {
+  flex: 1;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-left: 4rem;
+  height: 600px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.package-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* How it Works */
+.package-steps {
+  padding: 8rem 8%;
+  background: #f7f7f7;
+}
+
+.package-section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.steps-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.step-card {
+  background: #ffffff;
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.step-number {
+  background: #000000;
+  color: #ffffff;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+}
+
+.step-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.step-card p {
+  color: #555555;
+  line-height: 1.6;
+}
+
+/* Rules / What you can send */
+.package-rules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #000000;
+  color: #ffffff;
+}
+
+.rules-content {
+  padding: 6rem 8%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.rules-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 3rem;
+}
+
+.rules-list li {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rules-icon {
+  background: rgba(255,255,255,0.1);
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.rules-image {
+  background: url('https://images.unsplash.com/photo-1620455866160-c3d528cd0214?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+  min-height: 500px;
+}
+
+/* Final Banner */
+.package-final {
+  padding: 8rem 8%;
+  text-align: center;
+}
+
+.package-final h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.package-final p {
+  font-size: 1.25rem;
+  color: #555555;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 968px) {
+  .package-hero {
+    flex-direction: column;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  
+  .package-hero-image-wrapper {
+    margin-left: 0;
+    margin-top: 3rem;
+    width: 100%;
+    height: 400px;
+  }
+
+  .package-rules {
+    grid-template-columns: 1fr;
+  }
+  
+  .rules-image {
+    min-height: 400px;
+  }
+}

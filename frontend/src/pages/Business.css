@@ -1,0 +1,365 @@
+.business-page {
+  font-family: 'Inter', 'Outfit', sans-serif;
+  color: var(--text-primary, #121212);
+  background-color: var(--bg-primary, #ffffff);
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.business-hero {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary, #ffffff);
+  padding: 0 5%;
+}
+
+.business-hero-content {
+  flex: 1;
+  max-width: 600px;
+  z-index: 2;
+  animation: slideUp 1s ease-out forwards;
+}
+
+.business-hero-title {
+  font-size: clamp(3.5rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -1.5px;
+  color: var(--text-primary, #000000);
+}
+
+.business-hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 2.5rem;
+  color: #555555;
+  line-height: 1.5;
+}
+
+.business-cta-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.business-btn-primary {
+  padding: 1rem 2rem;
+  background: #000000;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid #000000;
+}
+
+.business-btn-primary:hover {
+  background: #333333;
+  border-color: #333333;
+}
+
+.business-btn-secondary {
+  padding: 1rem 2rem;
+  background: transparent;
+  color: #000000;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid #000000;
+}
+
+.business-btn-secondary:hover {
+  background: #f1f1f1;
+}
+
+.business-hero-image-wrapper {
+  flex: 1;
+  height: 70vh;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-left: 4rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.business-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Solutions Grid */
+.business-solutions {
+  padding: 6rem 5%;
+  background: #f7f7f7;
+}
+
+.business-section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 4rem;
+}
+
+.business-section-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.business-section-header p {
+  font-size: 1.2rem;
+  color: #555555;
+}
+
+.solutions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.solution-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.solution-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+}
+
+.solution-image {
+  height: 200px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.solution-content {
+  padding: 2rem;
+}
+
+.solution-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.solution-content p {
+  color: #555555;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.solution-link {
+  color: #000000;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.solution-link::after {
+  content: '→';
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.solution-link:hover::after {
+  transform: translateX(5px);
+}
+
+/* Value Prop Banner */
+.business-value-prop {
+  background: #000000;
+  color: #ffffff;
+  padding: 6rem 5%;
+}
+
+.value-prop-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.value-prop-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.value-prop-content p {
+  font-size: 1.1rem;
+  color: #cccccc;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.value-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.value-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.value-icon {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.8rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+
+.value-text h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.value-text p {
+  font-size: 0.95rem;
+  color: #aaaaaa;
+  margin-bottom: 0;
+}
+
+/* Extended Final CTA */
+.business-final-cta-extended {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f1f1f1;
+  margin: 4rem 5%;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.extended-cta-content {
+  padding: 6rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.extended-cta-content h2 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.extended-cta-content p {
+  font-size: 1.15rem;
+  color: #555555;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.extended-cta-perks {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.extended-cta-perks li {
+  display: flex;
+  align-items: center;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.extended-cta-perks li span {
+  color: #000000;
+  font-weight: bold;
+  margin-right: 0.75rem;
+  background: #e0e0e0;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+.extended-cta-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.extended-cta-image {
+  height: 100%;
+  min-height: 500px;
+}
+
+.extended-cta-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .business-hero {
+    flex-direction: column;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  
+  .business-hero-image-wrapper {
+    margin-left: 0;
+    margin-top: 3rem;
+    width: 100%;
+    height: 400px;
+  }
+
+  .value-prop-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .business-final-cta-extended {
+    grid-template-columns: 1fr;
+    margin: 2rem 5%;
+  }
+  
+  .extended-cta-content {
+    padding: 3rem 2rem;
+  }
+  
+  .extended-cta-perks {
+    grid-template-columns: 1fr;
+  }
+  
+  .extended-cta-image {
+    min-height: 350px;
+  }
+}
