@@ -46,4 +46,19 @@ const getActiveRides = async (req, res) => {
   }
 };
 
-module.exports = { requestRide, getActiveRides };
+// @desc    Get user's past ride locations
+// @route   GET /api/rides/history/:userId
+// @access  Public
+const getUserRideHistory = async (req, res) => {
+  try {
+    const rides = await Ride.find({ rider: req.params.userId })
+                          .select('pickupLocation.address dropoffLocation.address')
+                          .sort({ createdAt: -1 })
+                          .limit(10);
+    res.json(rides);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { requestRide, getActiveRides, getUserRideHistory };

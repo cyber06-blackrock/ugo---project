@@ -7,11 +7,26 @@ const Reserve = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Get current IST date and time
+  const getISTTime = () => {
+    const d = new Date();
+    const options = { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+    const istString = d.toLocaleString('en-IN', options);
+    const [datePart, timePart] = istString.split(', ');
+    const [day, month, year] = datePart.split('/');
+    return {
+      date: `${year}-${month}-${day}`,
+      time: timePart
+    };
+  };
+
+  const istDefaults = getISTTime();
+
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
-    date: '',
-    time: '',
+    date: istDefaults.date,
+    time: istDefaults.time,
     rideType: 'UgoX',
   });
 
@@ -58,6 +73,7 @@ const Reserve = () => {
                 value={formData.pickup}
                 onChange={handleChange}
                 placeholder="Enter pickup address"
+                list="jaipur-locations"
                 required
               />
             </div>
@@ -71,9 +87,22 @@ const Reserve = () => {
                 value={formData.dropoff}
                 onChange={handleChange}
                 placeholder="Enter destination address"
+                list="jaipur-locations"
                 required
               />
             </div>
+            
+            <datalist id="jaipur-locations">
+               <option value="Hawa Mahal" />
+               <option value="Amer Fort" />
+               <option value="City Palace" />
+               <option value="Albert Hall Museum" />
+               <option value="Jantar Mantar" />
+               <option value="Patrika Gate" />
+               <option value="Jaipur Railway Station" />
+               <option value="Jaipur International Airport" />
+               <option value="Jal Mahal" />
+            </datalist>
 
             <div className="reserve-form-row">
               <div className="form-group">

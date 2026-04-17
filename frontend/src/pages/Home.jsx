@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { Car, Package, Navigation, ArrowRight, Briefcase, Home as HomeIcon, Map, Shield, CreditCard, Calendar, QrCode } from 'lucide-react';
@@ -9,9 +9,37 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState('ride');
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
+  const [historyLocations, setHistoryLocations] = useState([]);
 
   // Default to Jaipur
   const position = [26.9124, 75.7873];
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const userStr = localStorage.getItem('ugo_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user._id) {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await fetch(`${API_URL}/api/rides/history/${user._id}`);
+            const data = await res.json();
+            
+            // Extract unique locations
+            const locations = new Set();
+            data.forEach(ride => {
+              if (ride.pickupLocation?.address) locations.add(ride.pickupLocation.address);
+              if (ride.dropoffLocation?.address) locations.add(ride.dropoffLocation.address);
+            });
+            setHistoryLocations(Array.from(locations));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch history:", err);
+      }
+    };
+    fetchHistory();
+  }, []);
 
   const handleRequestRide = (e) => {
     e.preventDefault();
@@ -41,6 +69,9 @@ const Home = () => {
               <h2 className="hero-heading">Go anywhere with <br />Ugo</h2>
              
              <datalist id="jaipur-locations">
+               {historyLocations.map((loc, idx) => (
+                 <option key={`hist-${idx}`} value={loc} />
+               ))}
                <option value="Hawa Mahal" />
                <option value="Amer Fort" />
                <option value="City Palace" />
