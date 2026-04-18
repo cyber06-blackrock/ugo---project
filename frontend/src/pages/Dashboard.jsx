@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import './Dashboard.css';
@@ -6,23 +6,22 @@ import './Dashboard.css';
 const Dashboard = () => {
   const [status, setStatus] = useState('offline');
   const [rideRequests, setRideRequests] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const watchId = useRef(null);
 
   useEffect(() => {
-    // Using axios for a GET request to fetch data from the database!
+    // Check initial status if we wanted (optional depending on API)
     const fetchActiveRides = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const response = await axios.get(`${API_URL}/api/rides/active`);
-        // 'response.data' contains the results we got back from Mongoose!
         setRideRequests(response.data);
       } catch (error) {
-        console.error("Failed to fetch rides via GET:", error);
+        console.error("Failed to fetch rides:", error);
       }
     };
-    
     fetchActiveRides();
 
-    // Example socket connection to backend
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const socket = io(API_URL);
     
@@ -34,8 +33,71 @@ const Dashboard = () => {
       setRideRequests(prev => [...prev, request]);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      socket.disconnect();
+      if (watchId.current) navigator.geolocation.clearWatch(watchId.current);
+    };
   }, []);
+
+  const handleToggleStatus = async () => {
+    setLoading(true);
+    const newStatus = status === 'online' ? 'offline' : 'online';
+    const token = localStorage.getItem('ugo_token');
+    
+    if (!token) {
+      alert("Please log in first!");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      
+      // Update backend
+      await axios.put(`${API_URL}/api/drivers/status`, 
+        { isAvailable: newStatus === 'online' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setStatus(newStatus);
+      
+      // Handle Location Tracking
+      if (newStatus === 'online') {
+        if ('geolocation' in navigator) {
+          watchId.current = navigator.geolocation.watchPosition(
+            async (position) => {
+              const { latitude, longitude } = position.coords;
+              try {
+                await axios.put(`${API_URL}/api/drivers/location`, 
+                  { lat: latitude, lng: longitude },
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                console.log("Location updated:", latitude, longitude);
+              } catch (err) {
+                console.error("Failed to update location to server", err);
+              }
+            },
+            (err) => console.error(err),
+            { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+          );
+        } else {
+          alert("Geolocation is not supported by your browser");
+        }
+      } else {
+        // Go offline -> Stop watching location
+        if (watchId.current) {
+          navigator.geolocation.clearWatch(watchId.current);
+          watchId.current = null;
+        }
+      }
+
+    } catch (error) {
+      console.error("Status toggle failed:", error);
+      alert("Failed to update status.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container animate-in db-page">
@@ -54,14 +116,18 @@ const Dashboard = () => {
         </div>
         <button 
           className={status === 'online' ? 'btn-primary' : 'btn-accent'}
-          onClick={() => setStatus(status === 'online' ? 'offline' : 'online')}
+          onClick={handleToggleStatus}
+          disabled={loading}
         >
-          {status === 'online' ? 'Go Offline' : 'Go Online'}
+          {loading ? 'Updating...' : (status === 'online' ? 'Go Offline' : 'Go Online')}
         </button>
       </div>
 
       <div className="map-container db-map">
          <h1>Live Map Tracking</h1>
+         <p style={{textAlign: 'center', marginTop: '1rem'}}>
+           {status === 'online' ? 'Your live location is being broadcasted.' : 'Go online to start broadcasting your location.'}
+         </p>
       </div>
 
       <h2>Recent Requests</h2>

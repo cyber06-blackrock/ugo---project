@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
+
+// Custom car icon for drivers
+const carIcon = new L.Icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/3204/3204121.png',
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16]
+});
 import './Home.css';
+
+// Component to dynamically update map center
+const MapUpdater = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, map.getZoom());
+  }, [center, map]);
+  return null;
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -10,18 +28,29 @@ const Home = () => {
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
   const [historyLocations, setHistoryLocations] = useState([]);
-
-  const position = [26.9124, 75.7873]; // Jaipur
+  const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [position, setPosition] = useState([26.9124, 75.7873]); // Default Jaipur
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Attempt to get Rider's actual location
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setPosition([pos.coords.latitude, pos.coords.longitude]);
+        },
+        (err) => console.error("Could not get rider location", err)
+      );
+    }
     const fetchHistory = async () => {
       try {
         const userStr = localStorage.getItem('ugo_user');
         if (userStr) {
-          const user = JSON.parse(userStr);
-          if (user._id) {
+          const parsedUser = JSON.parse(userStr);
+          setUser(parsedUser);
+          if (parsedUser._id) {
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            const res = await fetch(`${API_URL}/api/rides/history/${user._id}`);
+            const res = await fetch(`${API_URL}/api/rides/history/${parsedUser._id}`);
             const data = await res.json();
             const locations = new Set();
             data.forEach(ride => {
@@ -35,7 +64,29 @@ const Home = () => {
         console.error('Failed to fetch history:', err);
       }
     };
+
+    const fetchDrivers = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const token = localStorage.getItem('ugo_token');
+        const res = await fetch(`${API_URL}/api/drivers/available`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAvailableDrivers(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch drivers:', err);
+      }
+    };
+
     fetchHistory();
+    
+    // Poll for drivers every 10 seconds
+    fetchDrivers();
+    const intervalId = setInterval(fetchDrivers, 10000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleRequestRide = (e) => {
@@ -53,10 +104,24 @@ const Home = () => {
         {/* Map first on mobile (order-1), sidebar slides over it */}
         <div className="home-map">
           <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+            <MapUpdater center={position} />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
+            
+            {/* Render available drivers on map */}
+            {availableDrivers.map((driver) => (
+              driver.location?.lat && driver.location?.lng && (
+                <Marker 
+                  key={driver._id} 
+                  position={[driver.location.lat, driver.location.lng]}
+                  icon={carIcon}
+                >
+                  <Popup>{driver.name} (Driver)</Popup>
+                </Marker>
+              )
+            ))}
           </MapContainer>
         </div>
 
@@ -160,8 +225,14 @@ const Home = () => {
             <h2>Drive when you want,<br />make what you need</h2>
             <p>Make money on your schedule with deliveries or rides—or both. You can use your own car or choose a rental through Ugo.</p>
             <div className="promo-actions">
-              <button className="btn-secondary" onClick={() => navigate('/driver-onboarding')}>Get started</button>
-              <button className="btn-ghost">Already have an account? Sign in</button>
+              {user?.role === 'driver' ? (
+                <button className="btn-secondary" onClick={() => navigate('/dashboard')}>Go to Dashboard</button>
+              ) : (
+                <>
+                  <button className="btn-secondary" onClick={() => navigate('/driver-onboarding')}>Get started</button>
+                  <button className="btn-ghost" onClick={() => navigate('/login', { state: { role: 'driver' } })}>Already have an account? Sign in</button>
+                </>
+              )}
             </div>
           </div>
           <div className="promo-img" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800)" }} />

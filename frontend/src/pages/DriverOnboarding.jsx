@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './DriverOnboarding.css';
 
 const DriverOnboarding = () => {
@@ -35,6 +35,10 @@ const DriverOnboarding = () => {
       });
       
       console.log("Registered driver:", response.data);
+      // Store token and user data in localStorage
+      localStorage.setItem('ugo_token', response.data.token);
+      localStorage.setItem('ugo_user', JSON.stringify(response.data));
+
       alert("Successfully registered as a driver!");
       navigate('/dashboard'); // Take them to dashboard to go online
       
@@ -95,6 +99,10 @@ const DriverOnboarding = () => {
             {loading ? 'Creating account...' : 'Complete Sign Up'}
           </button>
         </form>
+
+        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.95rem' }}>
+          Already signed up? <Link to="/login" state={{ role: 'driver' }} style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>Log in</Link>
+        </div>
       </div>
     </div>
   );
