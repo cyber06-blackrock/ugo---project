@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
+import NearbyDrivers from '../components/NearbyDrivers';
 
 // Custom car icon for drivers
 const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
@@ -22,6 +23,23 @@ const carIcon = new L.Icon({
   iconAnchor: [18, 18],
   popupAnchor: [0, -18]
 });
+
+// User location marker (blue dot)
+const userDotSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="10" fill="#276ef1" opacity="0.2"/>
+  <circle cx="12" cy="12" r="6" fill="#276ef1"/>
+  <circle cx="12" cy="12" r="3" fill="#ffffff"/>
+</svg>
+`.trim());
+
+const userIcon = new L.Icon({
+  iconUrl: userDotSvg,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -14]
+});
+
 import './Home.css';
 
 // Component to dynamically update map center
@@ -33,38 +51,45 @@ const MapUpdater = ({ center }) => {
   return null;
 };
 
-const Home = () => {
+const Home = ({ userLocation }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('ride');
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
   const [historyLocations, setHistoryLocations] = useState([]);
   const [availableDrivers, setAvailableDrivers] = useState([]);
-  const [position, setPosition] = useState([26.9124, 75.7873]); // Default Jaipur
+  const [position, setPosition] = useState([
+    userLocation?.lat || 26.9124,
+    userLocation?.lng || 75.7873
+  ]);
   const [user, setUser] = useState(null);
-  const [locationToast, setLocationToast] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+
+  // Update position when userLocation prop changes
+  useEffect(() => {
+    if (userLocation?.lat && userLocation?.lng) {
+      setPosition([userLocation.lat, userLocation.lng]);
+      fetchDrivers(userLocation.lat, userLocation.lng);
+    }
+  }, [userLocation]);
+
+  const fetchDrivers = async (lat, lng) => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      let url = `${API_URL}/api/drivers/available`;
+      if (lat && lng) url += `?lat=${lat}&lng=${lng}`;
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableDrivers(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch drivers:', err);
+    }
+  };
 
   useEffect(() => {
-    // Request location silently — browser shows its native popup
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setPosition([lat, lng]);
-          fetchDrivers(lat, lng);
-        },
-        () => {
-          // Denied — just use default, show a brief toast
-          setLocationToast(true);
-          setTimeout(() => setLocationToast(false), 4000);
-          fetchDrivers(26.9124, 75.7873);
-        }
-      );
-    } else {
-      fetchDrivers(26.9124, 75.7873);
-    }
-
     const fetchHistory = async () => {
       try {
         const userStr = localStorage.getItem('ugo_user');
@@ -88,27 +113,7 @@ const Home = () => {
       }
     };
 
-    const fetchDrivers = async (lat, lng) => {
-      try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const token = localStorage.getItem('ugo_token');
-        let url = `${API_URL}/api/drivers/available`;
-        if (lat && lng) url += `?lat=${lat}&lng=${lng}`;
-        
-        const res = await fetch(url, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setAvailableDrivers(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch drivers:', err);
-      }
-    };
-
     fetchHistory();
-    // fetchDrivers is called from getCurrentPosition now
     
     // Connect Socket for Live Tracking
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -141,23 +146,16 @@ const Home = () => {
     }
   };
 
+  const handleSelectDriver = (driver) => {
+    setSelectedDriver(driver);
+    // Optionally center map on selected driver
+    if (driver.location?.lat && driver.location?.lng) {
+      setPosition([driver.location.lat, driver.location.lng]);
+    }
+  };
 
   return (
     <div className="home-container animate-in">
-
-      {/* Location denied toast */}
-      {locationToast && (
-        <div style={{
-          position: 'fixed', top: '80px', left: '50%', transform: 'translateX(-50%)',
-          background: '#1a1a1a', color: '#fff', padding: '0.75rem 1.5rem',
-          borderRadius: '999px', fontSize: '0.9rem', zIndex: 9999,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-          display: 'flex', alignItems: 'center', gap: '0.5rem',
-          animation: 'fadeInSlide 0.3s ease'
-        }}>
-          📍 Enable location to see drivers near you
-        </div>
-      )}
 
       {/* ── Hero: Map + Booking Sidebar ── */}
       <div className="home-content">
@@ -169,6 +167,13 @@ const Home = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
+
+            {/* User location marker */}
+            {userLocation?.lat && userLocation?.lng && (
+              <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+                <Popup>📍 You are here</Popup>
+              </Marker>
+            )}
             
             {/* Render available drivers on map */}
             {availableDrivers.map((driver) => (
@@ -178,7 +183,31 @@ const Home = () => {
                   position={[driver.location.lat, driver.location.lng]}
                   icon={carIcon}
                 >
-                  <Popup>{driver.name} (Driver)</Popup>
+                  <Popup>
+                    <div style={{ minWidth: '160px' }}>
+                      <strong>{driver.name}</strong>
+                      <br />
+                      <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                        {driver.vehicleName || 'UgoX'} • ⭐ {driver.rating?.toFixed(1) || '4.5'}
+                      </span>
+                      {driver.licensePlate && (
+                        <>
+                          <br />
+                          <span style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace' }}>
+                            {driver.licensePlate}
+                          </span>
+                        </>
+                      )}
+                      {driver.eta && (
+                        <>
+                          <br />
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#276ef1' }}>
+                            🕐 {driver.eta} min away
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </Popup>
                 </Marker>
               )
             ))}
@@ -255,6 +284,13 @@ const Home = () => {
               </div>
             </div>
           </div>
+
+          {/* ── Nearby Drivers Section ── */}
+          <NearbyDrivers
+            drivers={availableDrivers}
+            userLocation={userLocation}
+            onSelectDriver={handleSelectDriver}
+          />
         </div>
       </div>
 

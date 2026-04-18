@@ -51,45 +51,85 @@ const toggleAvailability = async (req, res) => {
   }
 };
 
-// @desc    Get all available drivers
+// Haversine formula to calculate distance between two coordinates
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+// @desc    Get all available drivers near a location
 // @route   GET /api/drivers/available
-// @access  Private
+// @access  Public (no auth needed — so users can see drivers on the map before logging in)
 const getAvailableDrivers = async (req, res) => {
   try {
-    const { lat, lng } = req.query;
-    
-    // Fetch real available drivers from DB
-    const realDrivers = await User.find({ role: 'driver', isAvailable: true }).select('-password');
-    
-    let availableDrivers = [...realDrivers];
+    const { lat, lng, radius } = req.query;
+    const maxRadius = parseFloat(radius) || 15; // default 15 km radius
 
-    // If rider provides location, generate 5 simulated drivers nearby
+    // Fetch all available drivers from DB with driver-specific fields
+    const realDrivers = await User.find({ role: 'driver', isAvailable: true })
+      .select('name location isAvailable vehicleType vehicleName licensePlate rating totalRides profilePhoto')
+      .lean();
+
+    let drivers = realDrivers;
+
+    // If rider provides location, calculate distance + ETA and filter by radius
     if (lat && lng) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
-      
-      const mockDrivers = Array.from({ length: 5 }).map((_, i) => {
-        // Random offset between -0.015 and 0.015 degrees (approx 1.5km radius)
-        const latOffset = (Math.random() - 0.5) * 0.03;
-        const lngOffset = (Math.random() - 0.5) * 0.03;
-        return {
-          _id: `mock-driver-${i}`,
-          name: `Ugo Driver ${i + 1}`,
-          role: 'driver',
-          location: {
-            lat: userLat + latOffset,
-            lng: userLng + lngOffset
-          }
-        };
-      });
-      
-      availableDrivers = [...availableDrivers, ...mockDrivers];
+
+      drivers = realDrivers
+        .map((driver) => {
+          if (!driver.location?.lat || !driver.location?.lng) return null;
+
+          const distance = haversineDistance(
+            userLat,
+            userLng,
+            driver.location.lat,
+            driver.location.lng
+          );
+
+          // Estimated arrival time: assume avg 30 km/h in city traffic
+          const etaMinutes = Math.max(1, Math.round((distance / 30) * 60));
+
+          return {
+            ...driver,
+            distance: parseFloat(distance.toFixed(2)),
+            eta: etaMinutes
+          };
+        })
+        .filter((d) => d !== null && d.distance <= maxRadius)
+        .sort((a, b) => a.distance - b.distance); // nearest first
     }
 
-    res.json(availableDrivers);
+    res.json(drivers);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { updateLocation, toggleAvailability, getAvailableDrivers };
+// @desc    Get a single driver's profile
+// @route   GET /api/drivers/:id
+// @access  Public
+const getDriverProfile = async (req, res) => {
+  try {
+    const driver = await User.findById(req.params.id)
+      .select('name location isAvailable vehicleType vehicleName licensePlate rating totalRides profilePhoto');
+
+    if (!driver || driver.role === 'rider') {
+      return res.status(404).json({ message: 'Driver not found' });
+    }
+
+    res.json(driver);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { updateLocation, toggleAvailability, getAvailableDrivers, getDriverProfile };

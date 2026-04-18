@@ -1,0 +1,245 @@
+/* ═══════════════════════════════════════
+   NEARBY DRIVERS — Scrollable driver cards
+   ═══════════════════════════════════════ */
+
+.nd-container {
+  padding: 0.75rem 0 0;
+}
+
+/* ── Header ── */
+.nd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  padding: 0 0.25rem;
+}
+
+.nd-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nd-type-strip {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.nd-type-badge {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  background: var(--surface-h);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ── Scroll container ── */
+.nd-scroll {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+
+.nd-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Driver card ── */
+.nd-card {
+  flex: 0 0 auto;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--surface-h);
+  border-radius: 14px;
+  padding: 0.85rem 0.6rem 0.7rem;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+  animation: ndSlideIn 0.4s ease backwards;
+}
+
+.nd-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes ndSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Avatar ── */
+.nd-avatar-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 0.4rem;
+}
+
+.nd-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nd-avatar-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #333, #000);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nd-online-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #fff;
+}
+
+/* ── Info ── */
+.nd-info {
+  text-align: center;
+  width: 100%;
+}
+
+.nd-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.nd-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.nd-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.nd-vehicle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  margin-bottom: 0.15rem;
+}
+
+.nd-vehicle-icon {
+  font-size: 0.75rem;
+}
+
+.nd-vehicle-name {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.nd-plate {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  letter-spacing: 0.03em;
+  display: inline-block;
+}
+
+/* ── ETA badge ── */
+.nd-eta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  width: 100%;
+}
+
+.nd-eta-time {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.nd-eta-label {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+/* ── More indicator ── */
+.nd-more {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 0.4rem 0 0;
+  font-weight: 500;
+}
+
+/* ── Responsive ── */
+@media (min-width: 768px) {
+  .nd-card {
+    width: 160px;
+    padding: 1rem 0.75rem 0.8rem;
+  }
+
+  .nd-name {
+    max-width: 100px;
+  }
+}

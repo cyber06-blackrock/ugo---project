@@ -13,15 +13,32 @@ import Reserve from './pages/Reserve';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Footer from './components/Footer';
+import LocationGate from './components/LocationGate';
 import './index.css';
 
 function AppContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [locationReady, setLocationReady] = useState(false);
+  const [userLocation, setUserLocation] = useState({ lat: 26.9124, lng: 75.7873 });
   const location = useLocation();
   const navigate = useNavigate();
 
   const closeMenu = () => setMenuOpen(false);
+
+  // Check if location was already granted this session
+  useEffect(() => {
+    const cached = sessionStorage.getItem('ugo_location_granted');
+    if (cached) {
+      setLocationReady(true);
+      if (cached === 'true') {
+        const loc = JSON.parse(sessionStorage.getItem('ugo_location') || '{}');
+        if (loc.lat && loc.lng) {
+          setUserLocation(loc);
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const userStr = localStorage.getItem('ugo_user');
@@ -42,6 +59,25 @@ function AppContent() {
     setUser(null);
     navigate('/');
   };
+
+  const handleLocationGranted = (lat, lng) => {
+    setUserLocation({ lat, lng });
+    setLocationReady(true);
+  };
+
+  const handleLocationDenied = () => {
+    setLocationReady(true);
+  };
+
+  // Show location gate before anything else
+  if (!locationReady) {
+    return (
+      <LocationGate
+        onLocationGranted={handleLocationGranted}
+        onLocationDenied={handleLocationDenied}
+      />
+    );
+  }
 
   return (
     <>
@@ -122,7 +158,7 @@ function AppContent() {
 
       <main style={{ flex: 1, minHeight: 'calc(100vh - 80px)' }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home userLocation={userLocation} />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/request-ride" element={<RideRequest />} />
           <Route path="/driver-onboarding" element={<DriverOnboarding />} />

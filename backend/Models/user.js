@@ -27,7 +27,35 @@ const userSchema = new mongoose.Schema({
   isAvailable: {
     type: Boolean,
     default: false
-  } // for drivers
+  },
+  // Driver-specific fields
+  vehicleType: {
+    type: String,
+    enum: ['UgoX', 'UgoXL', 'UgoBlack', 'UgoAuto', 'UgoMoto'],
+    default: 'UgoX'
+  },
+  vehicleName: {
+    type: String,
+    default: ''
+  },
+  licensePlate: {
+    type: String,
+    default: ''
+  },
+  rating: {
+    type: Number,
+    default: 4.5,
+    min: 1,
+    max: 5
+  },
+  totalRides: {
+    type: Number,
+    default: 0
+  },
+  profilePhoto: {
+    type: String,
+    default: ''
+  }
 }, { timestamps: true });
 
 // Hash password before saving
