@@ -146,12 +146,54 @@ const Home = () => {
   };
 
   if (!locationGranted) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--primary-color)' }}>
-          <h2 style={{ marginBottom: '1rem' }}>Ugo needs your location</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>Please allow location access in your browser to see nearby drivers.</p>
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', height: '100vh',
+        background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+        padding: '2rem', textAlign: 'center'
+      }}>
+        {/* Animated car icon */}
+        <div style={{
+          fontSize: '5rem', marginBottom: '1.5rem',
+          animation: 'pulse 2s ease-in-out infinite'
+        }}>🚗</div>
+
+        <h1 style={{
+          color: '#ffffff', fontSize: '2.2rem', fontWeight: 700,
+          letterSpacing: '-0.05em', marginBottom: '1rem'
+        }}>Where are you?</h1>
+
+        <p style={{
+          color: 'rgba(255,255,255,0.65)', fontSize: '1.05rem',
+          maxWidth: '380px', lineHeight: 1.6, marginBottom: '2rem'
+        }}>
+          Ugo needs your location to show nearby drivers and get you a ride fast.
+          Please allow access when your browser asks.
+        </p>
+
+        <div style={{
+          background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: '16px', padding: '1.25rem 2rem', marginBottom: '2rem',
+          maxWidth: '380px', width: '100%'
+        }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', margin: 0 }}>
+            📍 Waiting for location permission from your browser…
+          </p>
         </div>
-      );
+
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.82rem' }}>
+          Your location is only used to find nearby drivers and is never stored without your permission.
+        </p>
+
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+          }
+        `}</style>
+      </div>
+    );
   }
 
   return (
