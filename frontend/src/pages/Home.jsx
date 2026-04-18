@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
 import NearbyDrivers from '../components/NearbyDrivers';
+import { generateNearbyDrivers } from '../utils/generateDrivers';
 
 // Custom car icon for drivers
 const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
@@ -82,10 +83,21 @@ const Home = ({ userLocation }) => {
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setAvailableDrivers(data);
+        if (data.length > 0) {
+          setAvailableDrivers(data);
+          return;
+        }
       }
+      // If API returns empty or non-ok, fall back to generated drivers
+      throw new Error('No drivers from API');
     } catch (err) {
-      console.error('Failed to fetch drivers:', err);
+      // Fallback: generate realistic drivers around user's actual location
+      // This ensures drivers appear on Vercel even without backend
+      console.log('Using local driver generation (backend unavailable)');
+      if (lat && lng) {
+        const localDrivers = generateNearbyDrivers(lat, lng, 12);
+        setAvailableDrivers(localDrivers);
+      }
     }
   };
 
