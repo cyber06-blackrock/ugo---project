@@ -42,17 +42,33 @@ const Home = () => {
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [position, setPosition] = useState([26.9124, 75.7873]); // Default Jaipur
   const [user, setUser] = useState(null);
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [locationError, setLocationError] = useState(false);
 
   useEffect(() => {
     // Attempt to get Rider's actual location
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setPosition([pos.coords.latitude, pos.coords.longitude]);
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setPosition([lat, lng]);
+          setLocationGranted(true);
+          fetchDrivers(lat, lng);
         },
-        (err) => console.error("Could not get rider location", err)
+        (err) => {
+          console.error("Could not get rider location", err);
+          setLocationError(true);
+          // Fallback to default location so site still loads
+          setLocationGranted(true); 
+          fetchDrivers(26.9124, 75.7873);
+        }
       );
+    } else {
+      setLocationGranted(true);
+      fetchDrivers(26.9124, 75.7873);
     }
+
     const fetchHistory = async () => {
       try {
         const userStr = localStorage.getItem('ugo_user');
@@ -76,11 +92,14 @@ const Home = () => {
       }
     };
 
-    const fetchDrivers = async () => {
+    const fetchDrivers = async (lat, lng) => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const token = localStorage.getItem('ugo_token');
-        const res = await fetch(`${API_URL}/api/drivers/available`, {
+        let url = `${API_URL}/api/drivers/available`;
+        if (lat && lng) url += `?lat=${lat}&lng=${lng}`;
+        
+        const res = await fetch(url, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         if (res.ok) {
@@ -93,8 +112,7 @@ const Home = () => {
     };
 
     fetchHistory();
-    
-    fetchDrivers();
+    // fetchDrivers is called from getCurrentPosition now
     
     // Connect Socket for Live Tracking
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -115,9 +133,7 @@ const Home = () => {
       });
     });
 
-    const intervalId = setInterval(fetchDrivers, 30000); // Back-up poll every 30s
     return () => {
-      clearInterval(intervalId);
       socket.disconnect();
     };
   }, []);
@@ -128,6 +144,15 @@ const Home = () => {
       navigate('/request-ride', { state: { pickup, dropoff } });
     }
   };
+
+  if (!locationGranted) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--primary-color)' }}>
+          <h2 style={{ marginBottom: '1rem' }}>Ugo needs your location</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>Please allow location access in your browser to see nearby drivers.</p>
+        </div>
+      );
+  }
 
   return (
     <div className="home-container animate-in">

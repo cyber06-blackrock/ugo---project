@@ -56,8 +56,36 @@ const toggleAvailability = async (req, res) => {
 // @access  Private
 const getAvailableDrivers = async (req, res) => {
   try {
-    // Fetch all available drivers, excluding their passwords
-    const availableDrivers = await User.find({ role: 'driver', isAvailable: true }).select('-password');
+    const { lat, lng } = req.query;
+    
+    // Fetch real available drivers from DB
+    const realDrivers = await User.find({ role: 'driver', isAvailable: true }).select('-password');
+    
+    let availableDrivers = [...realDrivers];
+
+    // If rider provides location, generate 5 simulated drivers nearby
+    if (lat && lng) {
+      const userLat = parseFloat(lat);
+      const userLng = parseFloat(lng);
+      
+      const mockDrivers = Array.from({ length: 5 }).map((_, i) => {
+        // Random offset between -0.015 and 0.015 degrees (approx 1.5km radius)
+        const latOffset = (Math.random() - 0.5) * 0.03;
+        const lngOffset = (Math.random() - 0.5) * 0.03;
+        return {
+          _id: `mock-driver-${i}`,
+          name: `Ugo Driver ${i + 1}`,
+          role: 'driver',
+          location: {
+            lat: userLat + latOffset,
+            lng: userLng + lngOffset
+          }
+        };
+      });
+      
+      availableDrivers = [...availableDrivers, ...mockDrivers];
+    }
+
     res.json(availableDrivers);
   } catch (error) {
     res.status(500).json({ message: error.message });
