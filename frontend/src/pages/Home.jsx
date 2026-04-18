@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
@@ -83,10 +84,32 @@ const Home = () => {
 
     fetchHistory();
     
-    // Poll for drivers every 10 seconds
     fetchDrivers();
-    const intervalId = setInterval(fetchDrivers, 10000);
-    return () => clearInterval(intervalId);
+    
+    // Connect Socket for Live Tracking
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const socket = io(API_URL);
+
+    socket.on('driverLocationUpdate', (data) => {
+      setAvailableDrivers(prev => {
+        const index = prev.findIndex(d => d._id === data.driverId);
+        if (index > -1) {
+          // Update existing driver
+          const newDrivers = [...prev];
+          newDrivers[index] = { ...newDrivers[index], location: { lat: data.lat, lng: data.lng } };
+          return newDrivers;
+        } else {
+          // Add new driver if not in list
+          return [...prev, { _id: data.driverId, name: data.name, location: { lat: data.lat, lng: data.lng } }];
+        }
+      });
+    });
+
+    const intervalId = setInterval(fetchDrivers, 30000); // Back-up poll every 30s
+    return () => {
+      clearInterval(intervalId);
+      socket.disconnect();
+    };
   }, []);
 
   const handleRequestRide = (e) => {

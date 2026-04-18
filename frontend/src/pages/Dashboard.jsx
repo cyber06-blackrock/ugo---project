@@ -1,13 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import './Dashboard.css';
+
+const carIcon = new L.Icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/741/741407.png',
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16]
+});
+
+// Helper component to smoothly center map
+const MapUpdater = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center && center[0] && center[1]) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+};
 
 const Dashboard = () => {
   const [status, setStatus] = useState('offline');
   const [rideRequests, setRideRequests] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState([26.9124, 75.7873]); // Default Jaipur
   const watchId = useRef(null);
+  const socketRef = useRef(null);
 
   useEffect(() => {
     // Check initial status if we wanted (optional depending on API)
@@ -23,18 +45,18 @@ const Dashboard = () => {
     fetchActiveRides();
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const socket = io(API_URL);
+    socketRef.current = io(API_URL);
     
-    socket.on('connect', () => {
+    socketRef.current.on('connect', () => {
       console.log('Connected to simulation server');
     });
 
-    socket.on('rideRequest', (request) => {
+    socketRef.current.on('rideRequest', (request) => {
       setRideRequests(prev => [...prev, request]);
     });
 
     return () => {
-      socket.disconnect();
+      socketRef.current.disconnect();
       if (watchId.current) navigator.geolocation.clearWatch(watchId.current);
     };
   }, []);
@@ -67,12 +89,25 @@ const Dashboard = () => {
           watchId.current = navigator.geolocation.watchPosition(
             async (position) => {
               const { latitude, longitude } = position.coords;
+              setCurrentPosition([latitude, longitude]);
               try {
+                // Update DB
                 await axios.put(`${API_URL}/api/drivers/location`, 
                   { lat: latitude, lng: longitude },
                   { headers: { Authorization: `Bearer ${token}` } }
                 );
-                console.log("Location updated:", latitude, longitude);
+                // Emit Live Tracking Socket Event
+                const userStr = localStorage.getItem('ugo_user');
+                if (userStr && socketRef.current) {
+                  const user = JSON.parse(userStr);
+                  socketRef.current.emit('updateLocation', {
+                    driverId: user._id,
+                    name: user.name,
+                    lat: latitude,
+                    lng: longitude
+                  });
+                }
+                console.log("Location broadcasted:", latitude, longitude);
               } catch (err) {
                 console.error("Failed to update location to server", err);
               }
@@ -123,11 +158,19 @@ const Dashboard = () => {
         </button>
       </div>
 
-      <div className="map-container db-map">
-         <h1>Live Map Tracking</h1>
-         <p style={{textAlign: 'center', marginTop: '1rem'}}>
-           {status === 'online' ? 'Your live location is being broadcasted.' : 'Go online to start broadcasting your location.'}
-         </p>
+      <div className="map-container db-map" style={{ height: '400px', width: '100%', marginBottom: '2rem' }}>
+         <MapContainer center={currentPosition} zoom={14} style={{ height: '100%', width: '100%' }}>
+           <MapUpdater center={currentPosition} />
+           <TileLayer
+             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+           />
+           {status === 'online' && (
+             <Marker position={currentPosition} icon={carIcon}>
+               <Popup>You are here (Online)</Popup>
+             </Marker>
+           )}
+         </MapContainer>
       </div>
 
       <h2>Recent Requests</h2>
