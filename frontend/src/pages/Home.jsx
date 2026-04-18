@@ -6,11 +6,21 @@ import L from 'leaflet';
 import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
 
 // Custom car icon for drivers
+const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="16" y="8" width="32" height="48" rx="6" fill="#000000" />
+  <rect x="20" y="14" width="24" height="12" rx="2" fill="#333333" />
+  <rect x="20" y="38" width="24" height="14" rx="2" fill="#333333" />
+  <path d="M 16 20 L 12 20 L 12 28 L 16 28 Z" fill="#000000" />
+  <path d="M 48 20 L 52 20 L 52 28 L 48 28 Z" fill="#000000" />
+</svg>
+`.trim());
+
 const carIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/3204/3204121.png',
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -16]
+  iconUrl: uberCarSvg,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 });
 import './Home.css';
 

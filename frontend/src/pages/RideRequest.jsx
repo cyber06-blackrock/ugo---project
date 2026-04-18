@@ -6,10 +6,21 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import './RideRequest.css';
 
-const driverIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/3206/3206015.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20]
+const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="16" y="8" width="32" height="48" rx="6" fill="#000000" />
+  <rect x="20" y="14" width="24" height="12" rx="2" fill="#333333" />
+  <rect x="20" y="38" width="24" height="14" rx="2" fill="#333333" />
+  <path d="M 16 20 L 12 20 L 12 28 L 16 28 Z" fill="#000000" />
+  <path d="M 48 20 L 52 20 L 52 28 L 48 28 Z" fill="#000000" />
+</svg>
+`.trim());
+
+const carIcon = new L.Icon({
+  iconUrl: uberCarSvg,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 });
 
 const RideRequest = () => {
@@ -190,7 +201,7 @@ const RideRequest = () => {
             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           />
           {driverPosition && (
-            <Marker position={driverPosition} icon={driverIcon}>
+            <Marker position={driverPosition} icon={carIcon}>
               <Popup>Driver is here</Popup>
             </Marker>
           )}
