@@ -316,6 +316,13 @@
   transition: color 0.2s ease;
 }
 
-.btn-close:hover {
-  color: var(--secondary-color);
+.active-ride-card {
+  border-left: 6px solid #10b981;
+  background: linear-gradient(to right, #f0fdf4, #ffffff);
+  cursor: default;
+}
+
+.active-ride-card:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
 }

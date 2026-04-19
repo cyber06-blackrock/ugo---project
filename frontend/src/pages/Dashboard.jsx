@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import './Dashboard.css';
 
 const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
@@ -18,10 +18,12 @@ const Dashboard = () => {
   const [status, setStatus] = useState('offline');
   const [rideRequests, setRideRequests] = useState([]);
   const [selectedRide, setSelectedRide] = useState(null);
+  const [acceptedRide, setAcceptedRide] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPosition, setCurrentPosition] = useState({ lat: 26.9124, lng: 75.7873 }); // Default Jaipur
   const watchId = useRef(null);
   const socketRef = useRef(null);
+  const mapRef = useRef(null);
 
   // Mock stats for a professional look
   const [stats] = useState({
@@ -51,7 +53,6 @@ const Dashboard = () => {
     });
 
     socketRef.current.on('rideRequest', (request) => {
-      // Add a random KM for simulation if not present
       const simulatedRequest = {
         ...request,
         distance: request.distance || (Math.random() * 15 + 1).toFixed(1) + " km"
@@ -136,6 +137,19 @@ const Dashboard = () => {
     setSelectedRide(ride);
   };
 
+  const handleAcceptRide = (ride) => {
+    setAcceptedRide(ride);
+    setSelectedRide(null);
+    // Center map on customer pickup
+    if (ride.pickupLocation) {
+        setCurrentPosition({ 
+            lat: ride.pickupLocation.lat, 
+            lng: ride.pickupLocation.lng 
+        });
+    }
+    alert(`Ride Accepted! Picking up ${ride.rider?.name || 'Customer'}`);
+  };
+
   return (
     <div className="container animate-in db-page">
       {/* Header with Stats */}
@@ -195,11 +209,25 @@ const Dashboard = () => {
               disableDefaultUI={true}
               mapId={'bf51a910020fa1cf'}
               className="db-map"
+              onCameraChanged={(ev) => {
+                  // If we need to sync center manually
+              }}
             >
               {status === 'online' && (
                 <AdvancedMarker position={currentPosition}>
                   <img src={uberCarSvg} width={40} height={40} alt="You" />
                 </AdvancedMarker>
+              )}
+
+              {acceptedRide && (
+                  <>
+                    <AdvancedMarker position={{ lat: acceptedRide.pickupLocation.lat, lng: acceptedRide.pickupLocation.lng }}>
+                        <Pin background={'#276ef1'} glyphColor={'#fff'} borderColor={'#fff'} />
+                    </AdvancedMarker>
+                    <AdvancedMarker position={{ lat: acceptedRide.dropoffLocation.lat, lng: acceptedRide.dropoffLocation.lng }}>
+                        <Pin background={'#000'} glyphColor={'#fff'} borderColor={'#fff'} />
+                    </AdvancedMarker>
+                  </>
               )}
             </Map>
           </APIProvider>
@@ -207,38 +235,61 @@ const Dashboard = () => {
 
       {/* Requests Section */}
       <div className="db-requests-header">
-        <h2>Nearby Requests</h2>
-        {rideRequests.length > 0 && <span className="badge-pill">{rideRequests.length} available</span>}
+        <h2>{acceptedRide ? 'Active Ride' : 'Nearby Requests'}</h2>
+        {!acceptedRide && rideRequests.length > 0 && <span className="badge-pill">{rideRequests.length} available</span>}
       </div>
 
-      {rideRequests.length === 0 ? (
-        <div className="db-no-requests">
-          <p>Searching for nearby riders...</p>
-        </div>
+      {acceptedRide ? (
+          <div className="glass-card request-card active-ride-card">
+              <div className="request-info">
+                  <div className="request-locations">
+                    <h4 style={{ marginBottom: '0.5rem' }}>Rider: {acceptedRide.rider?.name || 'Customer'}</h4>
+                    <div className="loc-item">
+                        <span className="loc-dot pickup"></span>
+                        <span>{acceptedRide.pickupLocation.address}</span>
+                    </div>
+                    <div className="loc-item">
+                        <span className="loc-dot dropoff"></span>
+                        <span>{acceptedRide.dropoffLocation.address}</span>
+                    </div>
+                  </div>
+                  <div className="request-meta">
+                    <span className="request-price">₹{acceptedRide.fare}</span>
+                    <button className="btn-accent" onClick={() => setAcceptedRide(null)} style={{ marginTop: '1rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Complete Ride</button>
+                  </div>
+              </div>
+          </div>
       ) : (
-        <div className="card-grid">
-          {rideRequests.map((req, idx) => (
-             <div key={idx} className="glass-card request-card" onClick={() => handleRideClick(req)}>
-               <div className="request-info">
-                 <div className="request-locations">
-                   <div className="loc-item">
-                     <span className="loc-dot pickup"></span>
-                     <span>{req.pickup}</span>
+          rideRequests.length === 0 ? (
+            <div className="db-no-requests">
+              <p>Searching for nearby riders...</p>
+            </div>
+          ) : (
+            <div className="card-grid">
+              {rideRequests.map((req, idx) => (
+                 <div key={idx} className="glass-card request-card" onClick={() => handleRideClick(req)}>
+                   <div className="request-info">
+                     <div className="request-locations">
+                       <h4 style={{ marginBottom: '0.5rem' }}>{req.rider?.name || 'Customer'}</h4>
+                       <div className="loc-item">
+                         <span className="loc-dot pickup"></span>
+                         <span>{req.pickupLocation.address}</span>
+                       </div>
+                       <div className="loc-item">
+                         <span className="loc-dot dropoff"></span>
+                         <span>{req.dropoffLocation.address}</span>
+                       </div>
+                     </div>
+                     <div className="request-meta">
+                       <span className="request-price">₹{req.fare}</span>
+                       <span className="request-dist">{req.distance || "2.4 km"}</span>
+                     </div>
                    </div>
-                   <div className="loc-item">
-                     <span className="loc-dot dropoff"></span>
-                     <span>{req.dropoff}</span>
-                   </div>
+                   <button className="btn-accent db-accept-btn" style={{ padding: '0.75rem' }}>View Details</button>
                  </div>
-                 <div className="request-meta">
-                   <span className="request-price">{req.fare}</span>
-                   <span className="request-dist">{req.distance || "2.4 km"}</span>
-                 </div>
-               </div>
-               <button className="btn-accent db-accept-btn" style={{ padding: '0.75rem' }}>View Details</button>
-             </div>
-          ))}
-        </div>
+              ))}
+            </div>
+          )
       )}
 
       {/* Ride Detail Modal */}
@@ -246,14 +297,17 @@ const Dashboard = () => {
         <div className="ride-detail-overlay" onClick={() => setSelectedRide(null)}>
           <div className="ride-detail-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="detail-header">
-              <h3>New Ride Request</h3>
+              <div>
+                <h3 style={{ margin: 0 }}>New Ride Request</h3>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Rider: <strong>{selectedRide.rider?.name || 'Customer'}</strong></p>
+              </div>
               <button className="btn-close" onClick={() => setSelectedRide(null)}>×</button>
             </div>
 
             <div className="detail-grid">
               <div className="detail-item">
                 <label>Estimated Fare</label>
-                <span>{selectedRide.fare}</span>
+                <span>₹{selectedRide.fare}</span>
               </div>
               <div className="detail-item">
                 <label>Distance</label>
@@ -274,7 +328,7 @@ const Dashboard = () => {
                   <span className="loc-dot pickup"></span>
                   <div className="loc-text">
                     <label style={{ fontSize: '0.6rem', color: '#666' }}>PICKUP</label>
-                    <div style={{ fontWeight: '600' }}>{selectedRide.pickup}</div>
+                    <div style={{ fontWeight: '600' }}>{selectedRide.pickupLocation.address}</div>
                   </div>
                </div>
                <div style={{ height: '20px', borderLeft: '2px dashed #ccc', marginLeft: '3px', margin: '4px 0 4px 3px' }}></div>
@@ -282,17 +336,14 @@ const Dashboard = () => {
                   <span className="loc-dot dropoff"></span>
                   <div className="loc-text">
                     <label style={{ fontSize: '0.6rem', color: '#666' }}>DROPOFF</label>
-                    <div style={{ fontWeight: '600' }}>{selectedRide.dropoff}</div>
+                    <div style={{ fontWeight: '600' }}>{selectedRide.dropoffLocation.address}</div>
                   </div>
                </div>
             </div>
 
             <div className="detail-actions">
               <button className="btn-primary btn-decline" onClick={() => setSelectedRide(null)}>Decline</button>
-              <button className="btn-accent btn-accept-big" onClick={() => {
-                alert("Ride Accepted! Navigating to customer...");
-                setSelectedRide(null);
-              }}>Accept Ride</button>
+              <button className="btn-accent btn-accept-big" onClick={() => handleAcceptRide(selectedRide)}>Accept Ride</button>
             </div>
           </div>
         </div>
