@@ -292,6 +292,12 @@ input:focus {
   animation: fadeInSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.google-map-instance {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
 .glass-card {
   background: var(--surface);
   padding: 2rem;

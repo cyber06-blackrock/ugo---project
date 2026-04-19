@@ -57,9 +57,11 @@ const Home = ({ userLocation }) => {
       let url = `${API_URL}/api/drivers/available`;
       if (lat && lng) url += `?lat=${lat}&lng=${lng}`;
 
+      console.log('Fetching drivers from:', url);
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
+        console.log(`Found ${data.length} drivers from API`);
         if (data.length > 0) {
           setAvailableDrivers(data);
           return;
@@ -67,9 +69,10 @@ const Home = ({ userLocation }) => {
       }
       throw new Error('No drivers from API');
     } catch (err) {
-      console.log('Using local driver generation (backend unavailable)');
+      console.log('Using local driver generation (backend unavailable or empty)');
       if (lat && lng) {
         const localDrivers = generateNearbyDrivers(lat, lng, 12);
+        console.log(`Generated ${localDrivers.length} local drivers`);
         setAvailableDrivers(localDrivers);
       }
     }
