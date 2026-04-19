@@ -7,13 +7,14 @@ import NearbyDrivers from '../components/NearbyDrivers';
 import { generateNearbyDrivers } from '../utils/generateDrivers';
 
 // Custom car icon for drivers
-const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+// Custom RED car icon for drivers
+const redCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="16" y="8" width="32" height="48" rx="6" fill="#000000" />
-  <rect x="20" y="14" width="24" height="12" rx="2" fill="#333333" />
-  <rect x="20" y="38" width="24" height="14" rx="2" fill="#333333" />
-  <path d="M 16 20 L 12 20 L 12 28 L 16 28 Z" fill="#000000" />
-  <path d="M 48 20 L 52 20 L 52 28 L 48 28 Z" fill="#000000" />
+  <rect x="16" y="8" width="32" height="48" rx="6" fill="#ef4444" />
+  <rect x="20" y="14" width="24" height="12" rx="2" fill="#991b1b" />
+  <rect x="20" y="38" width="24" height="14" rx="2" fill="#991b1b" />
+  <path d="M 16 20 L 12 20 L 12 28 L 16 28 Z" fill="#ef4444" />
+  <path d="M 48 20 L 52 20 L 52 28 L 48 28 Z" fill="#ef4444" />
 </svg>
 `.trim());
 
@@ -165,15 +166,15 @@ const Home = ({ userLocation }) => {
                 </AdvancedMarker>
               )}
               
-              {/* Render available drivers on map */}
-              {availableDrivers.map((driver) => (
+              {/* Render max 5 available drivers on map as RED cars */}
+              {availableDrivers.slice(0, 5).map((driver) => (
                 driver.location?.lat && driver.location?.lng && (
                   <AdvancedMarker 
                     key={driver._id} 
                     position={{ lat: driver.location.lat, lng: driver.location.lng }}
                     onClick={() => setInfoWindowDriver(driver)}
                   >
-                    <img src={uberCarSvg} width={40} height={40} alt="Driver" className="driver-marker-img" />
+                    <img src={redCarSvg} width={40} height={40} alt="Driver" className="driver-marker-img" />
                   </AdvancedMarker>
                 )
               ))}
