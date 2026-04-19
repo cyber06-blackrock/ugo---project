@@ -14,8 +14,8 @@ const vehicleConfig = {
 const NearbyDrivers = ({ drivers, userLocation, onSelectDriver }) => {
   if (!drivers || drivers.length === 0) return null;
 
-  // Show max 20 nearest drivers
-  const displayDrivers = drivers.slice(0, 20);
+  // Show strictly max 3 nearest drivers (as per requirement: 1, 2, 3 min)
+  const displayDrivers = drivers.slice(0, 3);
 
   // Group by vehicle type for the summary strip
   const typeCounts = {};
@@ -122,12 +122,7 @@ const NearbyDrivers = ({ drivers, userLocation, onSelectDriver }) => {
         })}
       </div>
 
-      {/* Show more indicator */}
-      {drivers.length > 20 && (
-        <div className="nd-more">
-          + {drivers.length - 20} more drivers available
-        </div>
-      )}
+      {/* Strictly showing only 3 drivers within 3 mins */}
     </div>
   );
 };

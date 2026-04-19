@@ -63,8 +63,13 @@ const Home = ({ userLocation }) => {
       if (res.ok) {
         const data = await res.json();
         console.log(`Found ${data.length} drivers from API`);
-        if (data.length > 0) {
-          setAvailableDrivers(data);
+        
+        // Filter: Only show drivers till 3 min away
+        const filteredData = data.filter(d => d.eta <= 3).slice(0, 3);
+        console.log(`Showing ${filteredData.length} drivers (within 3 min limit)`);
+        
+        if (filteredData.length > 0) {
+          setAvailableDrivers(filteredData);
           return;
         }
       }
@@ -73,8 +78,9 @@ const Home = ({ userLocation }) => {
       console.log('Using local driver generation (backend unavailable or empty)');
       if (lat && lng) {
         const localDrivers = generateNearbyDrivers(lat, lng, 12);
-        console.log(`Generated ${localDrivers.length} local drivers`);
-        setAvailableDrivers(localDrivers);
+        const filteredLocal = localDrivers.filter(d => d.eta <= 3).slice(0, 3);
+        console.log(`Generated ${filteredLocal.length} local drivers (within 3 min limit)`);
+        setAvailableDrivers(filteredLocal);
       }
     }
   };
