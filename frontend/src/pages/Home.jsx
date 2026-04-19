@@ -153,7 +153,7 @@ const Home = ({ userLocation }) => {
             <Map
               defaultCenter={position}
               center={position}
-              defaultZoom={13}
+              defaultZoom={14}
               gestureHandling={'greedy'}
               disableDefaultUI={true}
               mapId={'bf51a910020fa1cf'} // Professional look with Map ID if available

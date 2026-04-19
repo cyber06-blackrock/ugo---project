@@ -48,9 +48,15 @@ export const generateNearbyDrivers = (lat, lng, count = 12) => {
   const drivers = [];
 
   for (let i = 0; i < count; i++) {
-    // Random offset: spread drivers within ~0.5 to ~3 km
+    // Random offset: spread drivers within ~0.3 to ~2.5 km for 1-5 min ETAs
     const angle = seededRandom() * Math.PI * 2;
-    const radiusKm = 0.5 + seededRandom() * 2.5;
+    // Ensure the first few drivers are specifically 1, 2, 3 mins away (approx 0.5, 1.0, 1.5 km)
+    let radiusKm;
+    if (i === 0) radiusKm = 0.4; // ~1 min
+    else if (i === 1) radiusKm = 0.9; // ~2 min
+    else if (i === 2) radiusKm = 1.4; // ~3 min
+    else radiusKm = 1.5 + seededRandom() * 3.0; 
+    
     // ~0.009 degrees ≈ 1 km
     const latOffset = Math.cos(angle) * radiusKm * 0.009;
     const lngOffset = Math.sin(angle) * radiusKm * 0.009;
