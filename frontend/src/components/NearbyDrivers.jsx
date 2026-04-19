@@ -30,7 +30,7 @@ const NearbyDrivers = ({ drivers, userLocation, onSelectDriver }) => {
       <div className="nd-header">
         <h3 className="nd-title">
           <MapPin size={18} />
-          {drivers.length} driver{drivers.length !== 1 ? 's' : ''} nearby
+          {drivers.length} cars near your location
         </h3>
         <div className="nd-type-strip">
           {Object.entries(typeCounts).map(([type, count]) => (

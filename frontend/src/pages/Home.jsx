@@ -18,11 +18,11 @@ const redCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 </svg>
 `.trim());
 
-// User location marker (blue dot)
+// User location marker (RED dot)
 const userDotSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <circle cx="12" cy="12" r="10" fill="#276ef1" opacity="0.2"/>
-  <circle cx="12" cy="12" r="6" fill="#276ef1"/>
+  <circle cx="12" cy="12" r="10" fill="#ef4444" opacity="0.2"/>
+  <circle cx="12" cy="12" r="6" fill="#ef4444"/>
   <circle cx="12" cy="12" r="3" fill="#ffffff"/>
 </svg>
 `.trim());
