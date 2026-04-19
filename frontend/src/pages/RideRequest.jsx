@@ -209,8 +209,5 @@ const RideRequest = () => {
     </div>
   );
 };
-    </div>
-  );
-};
 
 export default RideRequest;

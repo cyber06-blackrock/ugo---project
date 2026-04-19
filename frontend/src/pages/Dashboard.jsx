@@ -23,7 +23,6 @@ const Dashboard = () => {
   const [currentPosition, setCurrentPosition] = useState({ lat: 26.9124, lng: 75.7873 }); // Default Jaipur
   const watchId = useRef(null);
   const socketRef = useRef(null);
-  const mapRef = useRef(null);
 
   // Mock stats for a professional look
   const [stats] = useState({
@@ -209,7 +208,7 @@ const Dashboard = () => {
               disableDefaultUI={true}
               mapId={'bf51a910020fa1cf'}
               className="db-map"
-              onCameraChanged={(ev) => {
+              onCameraChanged={() => {
                   // If we need to sync center manually
               }}
             >
