@@ -10,7 +10,7 @@ const requestRide = async (req, res) => {
     // In a real app, you would use Google Maps API to calculate distance/time
     // Here we generate a mock fare based on a static string length for demo purposes
     const mockDistance = Math.abs(pickup.length - dropoff.length) + 5; 
-    const calculatedFare = mockDistance * 50; // ₹50 per km
+    const calculatedFare = mockDistance * 25; // ₹25 per km
 
     const newRide = await Ride.create({
       rider: riderId,

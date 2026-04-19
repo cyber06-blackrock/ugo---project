@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
+import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow, ControlPosition, MapControl } from '@vis.gl/react-google-maps';
+import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar, LocateFixed } from 'lucide-react';
 import NearbyDrivers from '../components/NearbyDrivers';
 import { generateNearbyDrivers } from '../utils/generateDrivers';
 
@@ -18,13 +17,6 @@ const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 </svg>
 `.trim());
 
-const carIcon = new L.Icon({
-  iconUrl: uberCarSvg,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-  popupAnchor: [0, -18]
-});
-
 // User location marker (blue dot)
 const userDotSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -34,23 +26,7 @@ const userDotSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 </svg>
 `.trim());
 
-const userIcon = new L.Icon({
-  iconUrl: userDotSvg,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14],
-  popupAnchor: [0, -14]
-});
-
 import './Home.css';
-
-// Component to dynamically update map center
-const MapUpdater = ({ center }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
-  return null;
-};
 
 const Home = ({ userLocation }) => {
   const navigate = useNavigate();
@@ -59,17 +35,18 @@ const Home = ({ userLocation }) => {
   const [dropoff, setDropoff] = useState('');
   const [historyLocations, setHistoryLocations] = useState([]);
   const [availableDrivers, setAvailableDrivers] = useState([]);
-  const [position, setPosition] = useState([
-    userLocation?.lat || 26.9124,
-    userLocation?.lng || 75.7873
-  ]);
+  const [position, setPosition] = useState({
+    lat: userLocation?.lat || 26.9124,
+    lng: userLocation?.lng || 75.7873
+  });
   const [user, setUser] = useState(null);
   const [selectedDriver, setSelectedDriver] = useState(null);
+  const [infoWindowDriver, setInfoWindowDriver] = useState(null);
 
   // Update position when userLocation prop changes
   useEffect(() => {
     if (userLocation?.lat && userLocation?.lng) {
-      setPosition([userLocation.lat, userLocation.lng]);
+      setPosition({ lat: userLocation.lat, lng: userLocation.lng });
       fetchDrivers(userLocation.lat, userLocation.lng);
     }
   }, [userLocation]);
@@ -88,11 +65,8 @@ const Home = ({ userLocation }) => {
           return;
         }
       }
-      // If API returns empty or non-ok, fall back to generated drivers
       throw new Error('No drivers from API');
     } catch (err) {
-      // Fallback: generate realistic drivers around user's actual location
-      // This ensures drivers appear on Vercel even without backend
       console.log('Using local driver generation (backend unavailable)');
       if (lat && lng) {
         const localDrivers = generateNearbyDrivers(lat, lng, 12);
@@ -135,12 +109,10 @@ const Home = ({ userLocation }) => {
       setAvailableDrivers(prev => {
         const index = prev.findIndex(d => d._id === data.driverId);
         if (index > -1) {
-          // Update existing driver
           const newDrivers = [...prev];
           newDrivers[index] = { ...newDrivers[index], location: { lat: data.lat, lng: data.lng } };
           return newDrivers;
         } else {
-          // Add new driver if not in list
           return [...prev, { _id: data.driverId, name: data.name, location: { lat: data.lat, lng: data.lng } }];
         }
       });
@@ -160,70 +132,63 @@ const Home = ({ userLocation }) => {
 
   const handleSelectDriver = (driver) => {
     setSelectedDriver(driver);
-    // Optionally center map on selected driver
     if (driver.location?.lat && driver.location?.lng) {
-      setPosition([driver.location.lat, driver.location.lng]);
+      setPosition({ lat: driver.location.lat, lng: driver.location.lng });
     }
   };
+
+  const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   return (
     <div className="home-container animate-in">
 
       {/* ── Hero: Map + Booking Sidebar ── */}
       <div className="home-content">
-        {/* Map first on mobile (order-1), sidebar slides over it */}
         <div className="home-map">
-          <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
-            <MapUpdater center={position} />
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-            />
+          <APIProvider apiKey={API_KEY}>
+            <Map
+              defaultCenter={position}
+              center={position}
+              defaultZoom={13}
+              gestureHandling={'greedy'}
+              disableDefaultUI={true}
+              mapId={'bf51a910020fa1cf'} // Professional look with Map ID if available
+              className="google-map-instance"
+            >
+              {/* User location marker */}
+              {userLocation?.lat && userLocation?.lng && (
+                <AdvancedMarker position={{ lat: userLocation.lat, lng: userLocation.lng }}>
+                  <img src={userDotSvg} width={32} height={32} alt="You" />
+                </AdvancedMarker>
+              )}
+              
+              {/* Render available drivers on map */}
+              {availableDrivers.map((driver) => (
+                driver.location?.lat && driver.location?.lng && (
+                  <AdvancedMarker 
+                    key={driver._id} 
+                    position={{ lat: driver.location.lat, lng: driver.location.lng }}
+                    onClick={() => setInfoWindowDriver(driver)}
+                  >
+                    <img src={uberCarSvg} width={40} height={40} alt="Driver" className="driver-marker-img" />
+                  </AdvancedMarker>
+                )
+              ))}
 
-            {/* User location marker */}
-            {userLocation?.lat && userLocation?.lng && (
-              <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
-                <Popup>📍 You are here</Popup>
-              </Marker>
-            )}
-            
-            {/* Render available drivers on map */}
-            {availableDrivers.map((driver) => (
-              driver.location?.lat && driver.location?.lng && (
-                <Marker 
-                  key={driver._id} 
-                  position={[driver.location.lat, driver.location.lng]}
-                  icon={carIcon}
+              {infoWindowDriver && (
+                <InfoWindow
+                  position={{ lat: infoWindowDriver.location.lat, lng: infoWindowDriver.location.lng }}
+                  onCloseClick={() => setInfoWindowDriver(null)}
                 >
-                  <Popup>
-                    <div style={{ minWidth: '160px' }}>
-                      <strong>{driver.name}</strong>
-                      <br />
-                      <span style={{ fontSize: '0.8rem', color: '#666' }}>
-                        {driver.vehicleName || 'UgoX'} • ⭐ {driver.rating?.toFixed(1) || '4.5'}
-                      </span>
-                      {driver.licensePlate && (
-                        <>
-                          <br />
-                          <span style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace' }}>
-                            {driver.licensePlate}
-                          </span>
-                        </>
-                      )}
-                      {driver.eta && (
-                        <>
-                          <br />
-                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#276ef1' }}>
-                            🕐 {driver.eta} min away
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              )
-            ))}
-          </MapContainer>
+                  <div className="map-info-window">
+                    <strong>{infoWindowDriver.name}</strong>
+                    <p>{infoWindowDriver.vehicleName || 'UgoX'} • ⭐ {infoWindowDriver.rating?.toFixed(1) || '4.5'}</p>
+                    {infoWindowDriver.eta && <p className="eta-text">🕐 {infoWindowDriver.eta} min away</p>}
+                  </div>
+                </InfoWindow>
+              )}
+            </Map>
+          </APIProvider>
         </div>
 
         <div className="home-sidebar">

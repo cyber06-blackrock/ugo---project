@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import './RideRequest.css';
 
 const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
@@ -16,13 +15,6 @@ const uberCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 </svg>
 `.trim());
 
-const carIcon = new L.Icon({
-  iconUrl: uberCarSvg,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-  popupAnchor: [0, -18]
-});
-
 const RideRequest = () => {
   const location = useLocation();
   const [pickup, setPickup]           = useState(location.state?.pickup || '');
@@ -34,7 +26,7 @@ const RideRequest = () => {
   const [driverMetrics, setDriverMetrics]   = useState({ distance: 0, eta: 0 });
   const [historyLocations, setHistoryLocations] = useState([]);
   const navigate = useNavigate();
-  const defaultMapCenter = [26.9124, 75.7873];
+  const defaultMapCenter = { lat: 26.9124, lng: 75.7873 };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -63,7 +55,7 @@ const RideRequest = () => {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const socket = io(API_URL);
     socket.on('driverLocationUpdate', (data) => {
-      if (data?.lat && data?.lng) setDriverPosition([data.lat, data.lng]);
+      if (data?.lat && data?.lng) setDriverPosition({ lat: data.lat, lng: data.lng });
     });
     return () => socket.disconnect();
   }, []);
@@ -78,11 +70,11 @@ const RideRequest = () => {
     if (fareStatus !== 'tracking') return;
     let lat = 26.9200, lng = 75.7900;
     const tLat = 26.9124, tLng = 75.7873;
-    setDriverPosition([lat, lng]);
+    setDriverPosition({ lat, lng });
     const id = setInterval(() => {
       lat += (tLat - lat) * 0.05;
       lng += (tLng - lng) * 0.05;
-      setDriverPosition([lat, lng]);
+      setDriverPosition({ lat, lng });
       const dist = haversine(lat, lng, tLat, tLng);
       setDriverMetrics({ distance: dist.toFixed(2), eta: Math.max(1, Math.ceil(dist / 0.5)) });
       if (dist < 0.05) { clearInterval(id); setDriverMetrics({ distance: 0, eta: 0 }); alert('Driver has arrived!'); }
@@ -116,6 +108,8 @@ const RideRequest = () => {
       setFareStatus('tracking');
     }
   };
+
+  const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   return (
     <div className="rr-page animate-in">
@@ -194,19 +188,27 @@ const RideRequest = () => {
 
       {/* Map panel */}
       <div className="rr-map-panel">
-        <MapContainer center={defaultMapCenter} zoom={13}
-          style={{ height: '100%', width: '100%' }} zoomControl={false}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          />
-          {driverPosition && (
-            <Marker position={driverPosition} icon={carIcon}>
-              <Popup>Driver is here</Popup>
-            </Marker>
-          )}
-        </MapContainer>
+        <APIProvider apiKey={API_KEY}>
+          <Map
+            defaultCenter={defaultMapCenter}
+            center={driverPosition || defaultMapCenter}
+            defaultZoom={13}
+            gestureHandling={'greedy'}
+            disableDefaultUI={true}
+            mapId={'bf51a910020fa1cf'}
+            className="google-map-instance"
+          >
+            {driverPosition && (
+              <AdvancedMarker position={driverPosition}>
+                <img src={uberCarSvg} width={40} height={40} alt="Driver" />
+              </AdvancedMarker>
+            )}
+          </Map>
+        </APIProvider>
       </div>
+    </div>
+  );
+};
     </div>
   );
 };
