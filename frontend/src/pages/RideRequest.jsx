@@ -19,9 +19,10 @@ const RideRequest = () => {
   const location = useLocation();
   const [pickup, setPickup]           = useState(location.state?.pickup || '');
   const [dropoff, setDropoff]         = useState(location.state?.dropoff || '');
-  const [rideType, setRideType]       = useState('UgoX');
+  const [rideType, setRideType]       = useState('UgoGo'); // Default to most affordable
   const [fareStatus, setFareStatus]   = useState(null);
-  const [estimatedFare, setEstimatedFare] = useState(0);
+  const [quotes, setQuotes]           = useState([]);
+  const [selectedQuote, setSelectedQuote] = useState(null);
   const [driverPosition, setDriverPosition] = useState(null);
   const [driverMetrics, setDriverMetrics]   = useState({ distance: 0, eta: 0 });
   const [historyLocations, setHistoryLocations] = useState([]);
@@ -82,26 +83,41 @@ const RideRequest = () => {
     return () => clearInterval(id);
   }, [fareStatus]);
 
-  const handleCalculateFare = (e) => {
+  const handleCalculateFare = async (e) => {
     e.preventDefault();
     if (!pickup || !dropoff) return;
     setFareStatus('calculating');
-    setTimeout(() => {
-      const dist = Math.abs(pickup.length - dropoff.length) + 5;
-      const mult = rideType === 'UgoXL' ? 1.5 : rideType === 'UgoBlack' ? 2.5 : 1;
-      setEstimatedFare((dist * 50 * mult).toFixed(2));
+    
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await axios.get(`${API_URL}/api/rides/quote`, {
+        params: { pickup, dropoff }
+      });
+      setQuotes(response.data.quotes);
+      setSelectedQuote(response.data.quotes[0]); // Default to first (affordable)
       setFareStatus('calculated');
-    }, 1000);
+    } catch (error) {
+      console.error("Failed to get quotes:", error);
+      alert("Failed to calculate fare. Please try again.");
+      setFareStatus(null);
+    }
   };
 
   const handleRequestRide = async () => {
+    if (!selectedQuote) return;
     setFareStatus('requested');
     try {
       let userId = '64e3f192b45a1b0012345678';
       const userStr = localStorage.getItem('ugo_user');
       if (userStr) { const u = JSON.parse(userStr); if (u._id) userId = u._id; }
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_URL}/api/rides/request`, { riderId: userId, pickup, dropoff });
+      await axios.post(`${API_URL}/api/rides/request`, { 
+        riderId: userId, 
+        pickup, 
+        dropoff,
+        fare: selectedQuote.price,
+        distance: selectedQuote.distance + " km"
+      });
       setFareStatus('tracking');
     } catch (err) {
       console.error('Ride request error:', err);
@@ -113,19 +129,16 @@ const RideRequest = () => {
 
   return (
     <div className="rr-page animate-in">
-      {/* Form panel */}
       <div className="rr-form-panel glass-card">
-        <h2 className="rr-title">Request a Ride</h2>
+        <h2 className="rr-title">Where to?</h2>
 
         <form onSubmit={handleCalculateFare} className="rr-form">
-          {/* Pickup */}
           <div className="rr-input-wrap">
             <span className="rr-dot rr-dot--white" />
             <input type="text" placeholder="Pickup location" value={pickup}
               onChange={e => setPickup(e.target.value)} list="jaipur-locations" required />
           </div>
 
-          {/* Dropoff */}
           <div className="rr-input-wrap">
             <span className="rr-dot rr-dot--accent" />
             <input type="text" placeholder="Dropoff destination" value={dropoff}
@@ -141,34 +154,38 @@ const RideRequest = () => {
             <option value="Jal Mahal" />
           </datalist>
 
-          {/* Ride type */}
-          <div className="rr-type-group">
-            {['UgoX', 'UgoXL', 'UgoBlack'].map(type => (
-              <button key={type} type="button"
-                className={`rr-type-btn ${rideType === type ? 'rr-type-btn--active' : ''}`}
-                onClick={() => setRideType(type)}>
-                {type}
-              </button>
-            ))}
-          </div>
+          {fareStatus === 'calculated' && (
+            <div className="rr-quotes-list animate-in">
+              <h3 style={{ margin: '1rem 0 0.5rem', fontSize: '1rem' }}>Available Rides</h3>
+              {quotes.map((q, idx) => (
+                <div 
+                  key={idx} 
+                  className={`rr-quote-item ${selectedQuote?.type === q.type ? 'rr-quote-item--active' : ''}`}
+                  onClick={() => setSelectedQuote(q)}
+                >
+                  <div className="rr-quote-info">
+                    <strong>{q.type}</strong>
+                    <span style={{ fontSize: '0.8rem', color: '#666' }}>{q.info}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--accent-color)' }}>{q.duration} away</span>
+                  </div>
+                  <div className="rr-quote-price">
+                    <strong>₹{q.price}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          {/* Action buttons */}
           {fareStatus === null && (
-            <button type="submit" className="btn-accent rr-action-btn">See Prices</button>
+            <button type="submit" className="btn-accent rr-action-btn" style={{ marginTop: '1rem' }}>See Prices</button>
           )}
           {fareStatus === 'calculating' && (
-            <button disabled className="btn-primary rr-action-btn rr-disabled">Calculating…</button>
+            <button disabled className="btn-primary rr-action-btn rr-disabled">Searching rides…</button>
           )}
           {fareStatus === 'calculated' && (
-            <div className="rr-fare animate-in">
-              <div className="rr-fare-row">
-                <span className="rr-fare-type">{rideType}</span>
-                <span className="rr-fare-amt">₹{estimatedFare}</span>
-              </div>
-              <button type="button" onClick={handleRequestRide} className="btn-primary rr-action-btn">
-                Confirm {rideType}
-              </button>
-            </div>
+            <button type="button" onClick={handleRequestRide} className="btn-primary rr-action-btn" style={{ marginTop: '1rem' }}>
+              Confirm {selectedQuote?.type}
+            </button>
           )}
           {fareStatus === 'requested' && (
             <button disabled className="btn-primary rr-action-btn rr-disabled">Requesting…</button>
@@ -186,7 +203,6 @@ const RideRequest = () => {
         </form>
       </div>
 
-      {/* Map panel */}
       <div className="rr-map-panel">
         <APIProvider apiKey={API_KEY}>
           <Map
