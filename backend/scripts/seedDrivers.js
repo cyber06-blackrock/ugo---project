@@ -26,9 +26,9 @@ const User = mongoose.model('User', userSchema);
 
 // 30 realistic drivers spread around Jaipur
 const drivers = [
-  { name: 'Ramesh Kumar', email: 'ramesh.driver@ugo.com', lat: 26.9124, lng: 75.7873, type: 'UgoX', car: 'Swift Dzire' },
-  { name: 'Suresh Sharma', email: 'suresh.driver@ugo.com', lat: 26.9200, lng: 75.7950, type: 'UgoXL', car: 'Ertiga' },
-  { name: 'Priya Patel', email: 'priya.driver@ugo.com', lat: 26.9050, lng: 75.7800, type: 'UgoX', car: 'Hyundai i20' },
+  { name: 'Ramesh Kumar', email: 'ramesh.driver@ugo.com', lat: 26.9164, lng: 75.7873, type: 'UgoX', car: 'Swift Dzire' }, // ~1 min away (0.4km)
+  { name: 'Suresh Sharma', email: 'suresh.driver@ugo.com', lat: 26.9044, lng: 75.7873, type: 'UgoXL', car: 'Ertiga' },    // ~2 min away (0.9km)
+  { name: 'Priya Patel', email: 'priya.driver@ugo.com', lat: 26.9124, lng: 75.8003, type: 'UgoX', car: 'Hyundai i20' }, // ~3 min away (1.3km)
   { name: 'Arjun Singh', email: 'arjun.driver@ugo.com', lat: 26.9300, lng: 75.7700, type: 'UgoBlack', car: 'Mercedes C-Class' },
   { name: 'Meena Verma', email: 'meena.driver@ugo.com', lat: 26.8990, lng: 75.7980, type: 'UgoX', car: 'Tata Nexon' },
   { name: 'Anil Gupta', email: 'anil.driver@ugo.com', lat: 26.9180, lng: 75.8050, type: 'UgoX', car: 'Kia Sonet' },
