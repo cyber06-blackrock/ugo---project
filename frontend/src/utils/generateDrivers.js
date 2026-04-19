@@ -50,16 +50,25 @@ export const generateNearbyDrivers = (lat, lng, count = 12) => {
   for (let i = 0; i < count; i++) {
     // Random offset: spread drivers within ~0.3 to ~2.5 km for 1-5 min ETAs
     const angle = seededRandom() * Math.PI * 2;
-    // Ensure the first few drivers are specifically 1, 2, 3 mins away (approx 0.5, 1.0, 1.5 km)
+    // Ensure the first few drivers are specifically 1, 2, 3 mins away and SEPARATED by direction
     let radiusKm;
-    if (i === 0) radiusKm = 0.4; // ~1 min
-    else if (i === 1) radiusKm = 0.9; // ~2 min
-    else if (i === 2) radiusKm = 1.4; // ~3 min
-    else radiusKm = 1.5 + seededRandom() * 3.0; 
+    let customAngle = angle;
+    if (i === 0) { 
+        radiusKm = 0.45; // ~1 min
+        customAngle = 0; // East
+    } else if (i === 1) { 
+        radiusKm = 0.95; // ~2 min
+        customAngle = Math.PI * 0.75; // North-West
+    } else if (i === 2) { 
+        radiusKm = 1.45; // ~3 min
+        customAngle = Math.PI * 1.5; // South
+    } else {
+        radiusKm = 2.0 + seededRandom() * 4.0; 
+    }
     
     // ~0.009 degrees ≈ 1 km
-    const latOffset = Math.cos(angle) * radiusKm * 0.009;
-    const lngOffset = Math.sin(angle) * radiusKm * 0.009;
+    const latOffset = Math.cos(customAngle) * radiusKm * 0.009;
+    const lngOffset = Math.sin(customAngle) * radiusKm * 0.009;
 
     const vehicle = VEHICLES[Math.floor(seededRandom() * VEHICLES.length)];
     const driverName = DRIVER_NAMES[i % DRIVER_NAMES.length];
