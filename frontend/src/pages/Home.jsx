@@ -7,14 +7,20 @@ import NearbyDrivers from '../components/NearbyDrivers';
 import { generateNearbyDrivers } from '../utils/generateDrivers';
 
 // Custom car icon for drivers
-// Custom RED car icon for drivers
+// Custom RED car icon (minimalist Uber style)
 const redCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="16" y="8" width="32" height="48" rx="6" fill="#ef4444" />
-  <rect x="20" y="14" width="24" height="12" rx="2" fill="#991b1b" />
-  <rect x="20" y="38" width="24" height="14" rx="2" fill="#991b1b" />
-  <path d="M 16 20 L 12 20 L 12 28 L 16 28 Z" fill="#ef4444" />
-  <path d="M 48 20 L 52 20 L 52 28 L 48 28 Z" fill="#ef4444" />
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+      <feOffset dx="0" dy="1" result="offsetblur" />
+      <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
+      <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+  <circle cx="24" cy="24" r="22" fill="#ffffff" />
+  <circle cx="24" cy="24" r="20" fill="#ef4444" />
+  <path d="M 32 18 L 16 18 L 14 24 L 14 34 L 16 34 L 16 36 L 19 36 L 19 34 L 29 34 L 29 36 L 32 36 L 32 34 L 34 34 L 34 24 L 32 18 Z M 18 22 L 30 22 L 31 25 L 17 25 L 18 22 Z" fill="#ffffff" />
 </svg>
 `.trim());
 
