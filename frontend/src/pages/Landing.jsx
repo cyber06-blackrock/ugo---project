@@ -4,12 +4,12 @@ import { Car, MapPin, Navigation, Smartphone, CreditCard, ShieldCheck, X } from 
 import './Landing.css';
 
 const rideOptions = [
-  { id: 'ride', title: 'Ride', image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=400', desc: 'Go anywhere with Ugo. Affordable and reliable everyday rides.' },
+  { id: 'ride', title: 'Ride', image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=400', desc: 'Go anywhere with Ugo. Affordable and reliable everyday rides.' },
   { id: 'bike', title: 'Bike', image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=400', desc: 'Beat the traffic with quick and affordable bike rides.' },
-  { id: 'intercity', title: 'Intercity', image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=400', desc: 'Travel outstation comfortably with top-rated drivers.' },
-  { id: 'parcel', title: 'Parcel', image: 'https://images.unsplash.com/photo-1580674684081-77673f40f0c0?auto=format&fit=crop&q=80&w=400', desc: 'Send and receive packages instantly across the city.' },
-  { id: 'rentals', title: 'Rentals', image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=400', desc: 'Rent a car with a driver for multiple stops.' },
-  { id: 'reserve', title: 'Reserve', image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&q=80&w=400', desc: 'Book your ride up to 90 days in advance.' },
+  { id: 'intercity', title: 'Intercity', image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=400', desc: 'Travel outstation comfortably with top-rated drivers.' },
+  { id: 'parcel', title: 'Parcel', image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&q=80&w=400', desc: 'Send and receive packages instantly across the city.' },
+  { id: 'rentals', title: 'Rentals', image: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=400', desc: 'Rent a car with a driver for multiple stops.' },
+  { id: 'reserve', title: 'Reserve', image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=400', desc: 'Book your ride up to 90 days in advance.' },
 ];
 
 const Landing = () => {
@@ -77,7 +77,7 @@ const Landing = () => {
             </form>
           </div>
         </div>
-        <div className="hero-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=1200')" }}></div>
+        <div className="hero-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=1200')" }}></div>
       </section>
 
       {/* Ways to Ride Section */}
@@ -146,7 +146,7 @@ const Landing = () => {
             <p>Peace of mind is designed into your experience. Safety features are built into the app to protect you during every ride.</p>
             <button className="btn-secondary" onClick={() => navigate('/about')}>Learn more about safety</button>
           </div>
-          <div className="image-content" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&q=80&w=600')" }}></div>
+          <div className="image-content" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1533558701576-23c65e0272fb?auto=format&fit=crop&q=80&w=600')" }}></div>
         </div>
       </section>
 
