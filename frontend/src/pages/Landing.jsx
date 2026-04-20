@@ -5,7 +5,7 @@ import './Landing.css';
 
 const rideOptions = [
   { id: 'ride', title: 'Ride', image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=400', desc: 'Go anywhere with Ugo. Affordable and reliable everyday rides.' },
-  { id: 'auto', title: 'Auto', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Auto_Rickshaw_in_New_Delhi.jpg/800px-Auto_Rickshaw_in_New_Delhi.jpg', desc: 'Quick rides, at the best auto prices.' },
+  { id: 'auto', title: 'Auto', image: '/auto.png', desc: 'Quick rides, at the best auto prices.' },
   { id: 'bike', title: 'Bike', image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=400', desc: 'Beat the traffic with quick and affordable bike rides.' },
   { id: 'intercity', title: 'Intercity', image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=400', desc: 'Travel outstation comfortably with top-rated drivers.' },
   { id: 'parcel', title: 'Parcel', image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&q=80&w=400', desc: 'Send and receive packages instantly across the city.' },
