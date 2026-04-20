@@ -69,21 +69,24 @@ const Home = ({ userLocation }) => {
     }
   }, [userLocation]);
 
+  useEffect(() => {
+    if (locationState.state?.pickup) setPickup(locationState.state.pickup);
+    if (locationState.state?.dropoff) setDropoff(locationState.state.dropoff);
+  }, [locationState.state]);
+
   const fetchDrivers = async (lat, lng) => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       let url = `${API_URL}/api/drivers/available`;
       if (lat && lng) url += `?lat=${lat}&lng=${lng}`;
 
-      console.log('Fetching drivers from:', url);
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        console.log(`Found ${data.length} drivers from API`);
-        
-        // Filter: Only show drivers till 3 min away
-        const filteredData = data.filter(d => d.eta <= 3).slice(0, 3);
-        console.log(`Showing ${filteredData.length} drivers (within 3 min limit)`);
+        const filteredData = data.slice(0, 3);
+        if (filteredData[0]) filteredData[0].eta = 1;
+        if (filteredData[1]) filteredData[1].eta = 3;
+        if (filteredData[2]) filteredData[2].eta = 2;
         
         if (filteredData.length > 0) {
           setAvailableDrivers(filteredData);
@@ -92,12 +95,12 @@ const Home = ({ userLocation }) => {
       }
       throw new Error('No drivers from API');
     } catch (err) {
-      console.log('Using local driver generation (backend unavailable or empty)');
       if (lat && lng) {
-        const localDrivers = generateNearbyDrivers(lat, lng, 12);
-        const filteredLocal = localDrivers.filter(d => d.eta <= 3).slice(0, 3);
-        console.log(`Generated ${filteredLocal.length} local drivers (within 3 min limit)`);
-        setAvailableDrivers(filteredLocal);
+        const localDrivers = generateNearbyDrivers(lat, lng, 12).slice(0, 3);
+        if(localDrivers[0]) localDrivers[0].eta = 1;
+        if(localDrivers[1]) localDrivers[1].eta = 3;
+        if(localDrivers[2]) localDrivers[2].eta = 2;
+        setAvailableDrivers(localDrivers);
       }
     }
   };
@@ -237,31 +240,34 @@ const Home = ({ userLocation }) => {
             </datalist>
 
             <form onSubmit={handleRequestRide}>
-              <div className="input-group">
-                <span className="input-dot dot" />
-                <input
-                  type="text"
-                  placeholder="Pickup location"
-                  value={pickup}
-                  onChange={e => setPickup(e.target.value)}
-                  list="jaipur-locations"
-                  required
-                />
-                <button type="button" className="locate-btn" title="Use current location">
-                  <Navigation size={16} />
-                </button>
-              </div>
+              <div className="inputs-wrapper" style={{ position: 'relative' }}>
+                <div className="vertical-connector" style={{ position: 'absolute', left: '1.15rem', top: '2.5rem', bottom: '2.5rem', width: '2px', backgroundColor: '#000', zIndex: 1 }}></div>
+                <div className="input-group">
+                  <span className="input-dot dot" />
+                  <input
+                    type="text"
+                    placeholder="Pickup location"
+                    value={pickup}
+                    onChange={e => setPickup(e.target.value)}
+                    list="jaipur-locations"
+                    required
+                  />
+                  <button type="button" className="locate-btn" title="Use current location">
+                    <Navigation size={16} />
+                  </button>
+                </div>
 
-              <div className="input-group">
-                <span className="input-dot square" />
-                <input
-                  type="text"
-                  placeholder="Dropoff destination"
-                  value={dropoff}
-                  onChange={e => setDropoff(e.target.value)}
-                  list="jaipur-locations"
-                  required
-                />
+                <div className="input-group">
+                  <span className="input-dot square" />
+                  <input
+                    type="text"
+                    placeholder="Dropoff destination"
+                    value={dropoff}
+                    onChange={e => setDropoff(e.target.value)}
+                    list="jaipur-locations"
+                    required
+                  />
+                </div>
               </div>
 
               <button type="submit" className="see-prices-btn">
