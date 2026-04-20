@@ -149,24 +149,66 @@
   gap: 2rem;
 }
 
-.card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-radius: 0.75rem;
-  margin-bottom: 1.5rem;
+/* Card Updates for modal layout */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary, #f8f8f8);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.card h3 {
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+}
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
+.card-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-content h3 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
-.card p {
+.card-content p {
   color: var(--text-secondary);
   line-height: 1.5;
   font-size: 1rem;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.view-details-btn {
+  align-self: flex-start;
+  padding: 0.6rem 1.2rem;
+  background-color: var(--bg-primary, #fff);
+  color: var(--text-primary, #000);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-details-btn:hover {
+  background-color: var(--text-primary, #000);
+  color: var(--bg-primary, #fff);
+  border-color: var(--text-primary, #000);
 }
 
 .how-to-use {
@@ -250,4 +292,117 @@
   background-size: cover;
   background-position: center;
   border-radius: 1rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--bg-primary, #fff);
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #fff;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 10;
+  color: #000;
+}
+
+.modal-header {
+  position: relative;
+  height: 180px;
+}
+
+.modal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.modal-header h3 {
+  position: absolute;
+  bottom: 1rem;
+  left: 1.5rem;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  margin: 0;
+}
+
+.modal-form {
+  padding: 2rem 1.5rem;
+}
+
+.input-group {
+  margin-bottom: 1.2rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: var(--bg-secondary, #f8f8f8);
+  transition: all 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--text-primary, #000);
+  background: var(--bg-primary, #fff);
+  box-shadow: inset 0 0 0 1px var(--text-primary, #000);
+}
+
+.half-width {
+  width: calc(50% - 0.5rem);
+  float: left;
+}
+
+.half-width:nth-of-type(even) {
+  margin-left: 1rem;
+}
+
+.modal-submit {
+  margin-top: 1.5rem;
 }

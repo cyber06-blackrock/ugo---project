@@ -1,16 +1,46 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, MapPin, Navigation, Smartphone, CreditCard, ShieldCheck } from 'lucide-react';
+import { Car, MapPin, Navigation, Smartphone, CreditCard, ShieldCheck, X } from 'lucide-react';
 import './Landing.css';
+
+const rideOptions = [
+  { id: 'ride', title: 'Ride', image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=400', desc: 'Go anywhere with Ugo. Affordable and reliable everyday rides.' },
+  { id: 'bike', title: 'Bike', image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=400', desc: 'Beat the traffic with quick and affordable bike rides.' },
+  { id: 'intercity', title: 'Intercity', image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=400', desc: 'Travel outstation comfortably with top-rated drivers.' },
+  { id: 'parcel', title: 'Parcel', image: 'https://images.unsplash.com/photo-1580674684081-77673f40f0c0?auto=format&fit=crop&q=80&w=400', desc: 'Send and receive packages instantly across the city.' },
+  { id: 'rentals', title: 'Rentals', image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=400', desc: 'Rent a car with a driver for multiple stops.' },
+  { id: 'reserve', title: 'Reserve', image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&q=80&w=400', desc: 'Book your ride up to 90 days in advance.' },
+];
 
 const Landing = () => {
   const navigate = useNavigate();
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
+  const [selectedOption, setSelectedOption] = useState(null);
+
+  // Modal State
+  const [modalPickup, setModalPickup] = useState('');
+  const [modalDropoff, setModalDropoff] = useState('');
+  const [modalVehicle, setModalVehicle] = useState('');
+  const [modalVehicleNo, setModalVehicleNo] = useState('');
 
   const handleSearch = (e) => {
     e.preventDefault();
     navigate('/ride', { state: { pickup, dropoff } });
+  };
+
+  const handleModalSearch = (e) => {
+    e.preventDefault();
+    // Pass everything needed to the ride page
+    navigate('/ride', { state: { pickup: modalPickup, dropoff: modalDropoff, vehicle: modalVehicle, vehicleNo: modalVehicleNo, type: selectedOption?.id } });
+  };
+
+  const openDetails = (option) => {
+    setSelectedOption(option);
+    setModalPickup(pickup);
+    setModalDropoff(dropoff);
+    setModalVehicle(option.title);
+    setModalVehicleNo('');
   };
 
   return (
@@ -55,21 +85,18 @@ const Landing = () => {
         <div className="container">
           <h2>Ways to ride</h2>
           <div className="grid-3">
-            <div className="card">
-              <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=400" alt="UgoX" />
-              <h3>UgoX</h3>
-              <p>Affordable, everyday rides for up to 4 people.</p>
-            </div>
-            <div className="card">
-              <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=400" alt="Comfort" />
-              <h3>Comfort</h3>
-              <p>Newer cars with extra legroom for a more comfortable ride.</p>
-            </div>
-            <div className="card">
-              <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=400" alt="XL" />
-              <h3>XL</h3>
-              <p>Comfortable rides for groups up to 6 people.</p>
-            </div>
+            {rideOptions.map((option) => (
+              <div className="card" key={option.id}>
+                <img src={option.image} alt={option.title} />
+                <div className="card-content">
+                  <h3>{option.title}</h3>
+                  <p>{option.desc}</p>
+                  <button className="view-details-btn" onClick={() => openDetails(option)}>
+                    View details
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -122,6 +149,65 @@ const Landing = () => {
           <div className="image-content" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&q=80&w=600')" }}></div>
         </div>
       </section>
+
+      {/* Booking Modal */}
+      {selectedOption && (
+        <div className="modal-overlay" onClick={() => setSelectedOption(null)}>
+          <div className="modal-content animate-in" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={() => setSelectedOption(null)}>
+              <X size={24} />
+            </button>
+            <div className="modal-header">
+              <img src={selectedOption.image} alt={selectedOption.title} className="modal-img" />
+              <h3>Book {selectedOption.title}</h3>
+            </div>
+            <form onSubmit={handleModalSearch} className="modal-form">
+              <div className="input-group">
+                <label>Pickup Location</label>
+                <input 
+                  type="text" 
+                  value={modalPickup} 
+                  onChange={(e) => setModalPickup(e.target.value)} 
+                  placeholder="Enter pickup" 
+                  required 
+                />
+              </div>
+              <div className="input-group">
+                <label>Destination</label>
+                <input 
+                  type="text" 
+                  value={modalDropoff} 
+                  onChange={(e) => setModalDropoff(e.target.value)} 
+                  placeholder="Enter destination" 
+                  required 
+                />
+              </div>
+              <div className="input-group half-width">
+                <label>Vehicle Type</label>
+                <input 
+                  type="text" 
+                  value={modalVehicle} 
+                  onChange={(e) => setModalVehicle(e.target.value)} 
+                  placeholder="E.g., Sedan" 
+                />
+              </div>
+              <div className="input-group half-width">
+                <label>Vehicle No (Optional)</label>
+                <input 
+                  type="text" 
+                  value={modalVehicleNo} 
+                  onChange={(e) => setModalVehicleNo(e.target.value)} 
+                  placeholder="E.g., RJ14 XX 1234" 
+                />
+              </div>
+              <div style={{ clear: 'both' }}></div>
+              <button type="submit" className="btn-primary full-width modal-submit">
+                See prices
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
