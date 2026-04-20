@@ -1,45 +1,56 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow, ControlPosition, MapControl } from '@vis.gl/react-google-maps';
-import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar, LocateFixed } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Car, Package, Navigation, Briefcase, Home as HomeIcon, Calendar } from 'lucide-react';
 import NearbyDrivers from '../components/NearbyDrivers';
 import { generateNearbyDrivers } from '../utils/generateDrivers';
 
-// Custom car icon for drivers
-// Custom RED car icon (minimalist Uber style)
-const redCarSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-  <defs>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-      <feOffset dx="0" dy="1" result="offsetblur" />
-      <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
-      <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
-    </filter>
-  </defs>
-  <circle cx="24" cy="24" r="22" fill="#ffffff" />
-  <circle cx="24" cy="24" r="20" fill="#ef4444" />
-  <path d="M 32 18 L 16 18 L 14 24 L 14 34 L 16 34 L 16 36 L 19 36 L 19 34 L 29 34 L 29 36 L 32 36 L 32 34 L 34 34 L 34 24 L 32 18 Z M 18 22 L 30 22 L 31 25 L 17 25 L 18 22 Z" fill="#ffffff" />
-</svg>
-`.trim());
+// Fix Leaflet default marker icon paths broken by Vite
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
-// User location marker (blue dot)
-const userDotSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <circle cx="12" cy="12" r="10" fill="#276ef1" opacity="0.3"/>
-  <circle cx="12" cy="12" r="7" fill="#276ef1"/>
-  <circle cx="12" cy="12" r="4" fill="#ffffff"/>
-</svg>
-`.trim());
+// Red car icon for drivers
+const driverIcon = L.divIcon({
+  className: '',
+  html: `<div style="width:40px;height:40px;background:#ef4444;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 48 48" fill="white">
+      <path d="M 32 18 L 16 18 L 14 24 L 14 34 L 16 34 L 16 36 L 19 36 L 19 34 L 29 34 L 29 36 L 32 36 L 32 34 L 34 34 L 34 24 L 32 18 Z M 18 22 L 30 22 L 31 25 L 17 25 L 18 22 Z"/>
+    </svg>
+  </div>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+});
+
+// Blue dot for user location
+const userIcon = L.divIcon({
+  className: '',
+  html: `<div style="width:20px;height:20px;background:#276ef1;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 6px rgba(39,110,241,0.25);"></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+// Helper: re-center map when position changes
+function MapRecenter({ center }) {
+  const map = useMap();
+  useEffect(() => { map.setView(center, map.getZoom()); }, [center]);
+  return null;
+}
 
 import './Home.css';
 
 const Home = ({ userLocation }) => {
   const navigate = useNavigate();
+  const locationState = useLocation();
   const [activeTab, setActiveTab] = useState('ride');
-  const [pickup, setPickup] = useState('');
-  const [dropoff, setDropoff] = useState('');
+  const [pickup, setPickup] = useState(locationState.state?.pickup || '');
+  const [dropoff, setDropoff] = useState(locationState.state?.dropoff || '');
   const [historyLocations, setHistoryLocations] = useState([]);
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [position, setPosition] = useState({
@@ -153,58 +164,50 @@ const Home = ({ userLocation }) => {
     }
   };
 
-  const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
   return (
     <div className="home-container animate-in">
 
       {/* ── Hero: Map + Booking Sidebar ── */}
       <div className="home-content">
         <div className="home-map">
-          <APIProvider apiKey={API_KEY}>
-            <Map
-              defaultCenter={position}
-              center={position}
-              defaultZoom={14}
-              gestureHandling={'greedy'}
-              disableDefaultUI={true}
-              mapId={'bf51a910020fa1cf'} // Professional look with Map ID if available
-              className="google-map-instance"
-            >
-              {/* User location marker */}
-              {userLocation?.lat && userLocation?.lng && (
-                <AdvancedMarker position={{ lat: userLocation.lat, lng: userLocation.lng }}>
-                  <img src={userDotSvg} width={32} height={32} alt="You" />
-                </AdvancedMarker>
-              )}
-              
-              {/* Render max 5 available drivers on map as RED cars */}
-              {availableDrivers.slice(0, 5).map((driver) => (
-                driver.location?.lat && driver.location?.lng && (
-                  <AdvancedMarker 
-                    key={driver._id} 
-                    position={{ lat: driver.location.lat, lng: driver.location.lng }}
-                    onClick={() => setInfoWindowDriver(driver)}
-                  >
-                    <img src={redCarSvg} width={40} height={40} alt="Driver" className="driver-marker-img" />
-                  </AdvancedMarker>
-                )
-              ))}
+          <MapContainer
+            center={[position.lat, position.lng]}
+            zoom={14}
+            style={{ width: '100%', height: '100%' }}
+            zoomControl={false}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <MapRecenter center={[position.lat, position.lng]} />
 
-              {infoWindowDriver && (
-                <InfoWindow
-                  position={{ lat: infoWindowDriver.location.lat, lng: infoWindowDriver.location.lng }}
-                  onCloseClick={() => setInfoWindowDriver(null)}
+            {/* User location blue dot */}
+            {userLocation?.lat && userLocation?.lng && (
+              <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+                <Popup>You are here</Popup>
+              </Marker>
+            )}
+
+            {/* Driver markers — red cars */}
+            {availableDrivers.slice(0, 5).map((driver) =>
+              driver.location?.lat && driver.location?.lng ? (
+                <Marker
+                  key={driver._id}
+                  position={[driver.location.lat, driver.location.lng]}
+                  icon={driverIcon}
                 >
-                  <div className="map-info-window">
-                    <strong>{infoWindowDriver.name}</strong>
-                    <p>{infoWindowDriver.vehicleName || 'UgoX'} • ⭐ {infoWindowDriver.rating?.toFixed(1) || '4.5'}</p>
-                    {infoWindowDriver.eta && <p className="eta-text">🕐 {infoWindowDriver.eta} min away</p>}
-                  </div>
-                </InfoWindow>
-              )}
-            </Map>
-          </APIProvider>
+                  <Popup>
+                    <div className="map-info-window">
+                      <strong>{driver.name}</strong>
+                      <p>{driver.vehicleName || 'UgoX'} • ⭐ {driver.rating?.toFixed(1) || '4.5'}</p>
+                      {driver.eta && <p className="eta-text">🕐 {driver.eta} min away</p>}
+                    </div>
+                  </Popup>
+                </Marker>
+              ) : null
+            )}
+          </MapContainer>
         </div>
 
         <div className="home-sidebar">

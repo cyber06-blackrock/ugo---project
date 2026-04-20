@@ -12,6 +12,7 @@ import Package from './pages/Package';
 import Reserve from './pages/Reserve';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Landing from './pages/Landing';
 import Footer from './components/Footer';
 import LocationGate from './components/LocationGate';
 import './index.css';
@@ -88,7 +89,7 @@ function AppContent() {
           {/* Desktop nav */}
           {location.pathname !== '/driver-onboarding' && (
             <nav className="desktop-nav">
-              <Link to="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Ride</Link>
+              <Link to="/ride" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Ride</Link>
               <Link to="/driver-onboarding" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Drive</Link>
               <Link to="/business" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Business</Link>
               <Link to="/about" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>About Us</Link>
@@ -130,7 +131,7 @@ function AppContent() {
       <nav className={`mobile-nav ${menuOpen ? 'mobile-nav--open' : ''}`} aria-hidden={!menuOpen}>
         {location.pathname !== '/driver-onboarding' && (
           <>
-            <Link to="/" onClick={closeMenu}>🚗 Ride</Link>
+            <Link to="/ride" onClick={closeMenu}>🚗 Ride</Link>
             <Link to="/driver-onboarding" onClick={closeMenu}>🚙 Drive</Link>
             <Link to="/business" onClick={closeMenu}>💼 Business</Link>
             <Link to="/about" onClick={closeMenu}>ℹ️ About Us</Link>
@@ -158,7 +159,8 @@ function AppContent() {
 
       <main style={{ flex: 1, minHeight: 'calc(100vh - 80px)' }}>
         <Routes>
-          <Route path="/" element={<Home userLocation={userLocation} />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/ride" element={<Home userLocation={userLocation} />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/request-ride" element={<RideRequest />} />
           <Route path="/driver-onboarding" element={<DriverOnboarding />} />
