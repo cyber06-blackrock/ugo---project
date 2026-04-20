@@ -61,6 +61,42 @@ const Home = ({ userLocation }) => {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [infoWindowDriver, setInfoWindowDriver] = useState(null);
 
+  const [pickupSuggestions, setPickupSuggestions] = useState([]);
+  const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
+  const pickupTimeout = useRef(null);
+  const dropoffTimeout = useRef(null);
+
+  const fetchSuggestions = async (query, type) => {
+    if (!query || query.length < 3) return;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&lat=${position.lat}&lon=${position.lng}`);
+      const data = await res.json();
+      const suggestions = data.map(item => item.display_name);
+      
+      if (type === 'pickup') {
+        setPickupSuggestions(suggestions);
+      } else {
+        setDropoffSuggestions(suggestions);
+      }
+    } catch (err) {
+      console.error("Failed to fetch suggestions", err);
+    }
+  };
+
+  const onPickupChange = (e) => {
+    const val = e.target.value;
+    setPickup(val);
+    if (pickupTimeout.current) clearTimeout(pickupTimeout.current);
+    pickupTimeout.current = setTimeout(() => fetchSuggestions(val, 'pickup'), 500);
+  };
+
+  const onDropoffChange = (e) => {
+    const val = e.target.value;
+    setDropoff(val);
+    if (dropoffTimeout.current) clearTimeout(dropoffTimeout.current);
+    dropoffTimeout.current = setTimeout(() => fetchSuggestions(val, 'dropoff'), 500);
+  };
+
   // Update position when userLocation prop changes
   useEffect(() => {
     if (userLocation?.lat && userLocation?.lng) {
@@ -230,13 +266,14 @@ const Home = ({ userLocation }) => {
           <div className="booking-card">
             <h2 className="hero-heading">Go anywhere with<br />Ugo</h2>
 
-            <datalist id="jaipur-locations">
-              {historyLocations.map((loc, idx) => <option key={idx} value={loc} />)}
-              <option value="Hawa Mahal" /><option value="Amer Fort" />
-              <option value="City Palace" /><option value="Albert Hall Museum" />
-              <option value="Jantar Mantar" /><option value="Patrika Gate" />
-              <option value="Jaipur Railway Station" /><option value="Jaipur International Airport" />
-              <option value="Jal Mahal" />
+            <datalist id="pickup-locations">
+              {historyLocations.map((loc, idx) => <option key={`hist-${idx}`} value={loc} />)}
+              {pickupSuggestions.map((loc, idx) => <option key={`pick-${idx}`} value={loc} />)}
+            </datalist>
+
+            <datalist id="dropoff-locations">
+              {historyLocations.map((loc, idx) => <option key={`hist-${idx}`} value={loc} />)}
+              {dropoffSuggestions.map((loc, idx) => <option key={`drop-${idx}`} value={loc} />)}
             </datalist>
 
             <form onSubmit={handleRequestRide}>
@@ -248,8 +285,8 @@ const Home = ({ userLocation }) => {
                     type="text"
                     placeholder="Pickup location"
                     value={pickup}
-                    onChange={e => setPickup(e.target.value)}
-                    list="jaipur-locations"
+                    onChange={onPickupChange}
+                    list="pickup-locations"
                     required
                   />
                   <button type="button" className="locate-btn" title="Use current location">
@@ -263,8 +300,8 @@ const Home = ({ userLocation }) => {
                     type="text"
                     placeholder="Dropoff destination"
                     value={dropoff}
-                    onChange={e => setDropoff(e.target.value)}
-                    list="jaipur-locations"
+                    onChange={onDropoffChange}
+                    list="dropoff-locations"
                     required
                   />
                 </div>
