@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
     enum: ['rider', 'driver'],
     default: 'rider',
   },
+  profilePhoto: {
+    type: String,  // Base64 or URL
+    default: '',
+  },
   // ── Driver-specific ───────────────────────────────────────────────
   location: {
     lat: { type: Number, default: 0 },

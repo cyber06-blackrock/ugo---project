@@ -17,6 +17,7 @@ const mockDb = {
     const user = {
       _id: id,
       ...userData,
+      profilePhoto: userData.profilePhoto || '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };

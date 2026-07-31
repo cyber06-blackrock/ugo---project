@@ -608,3 +608,76 @@
     padding-top: 1.25rem;
   }
 }
+
+
+/* ── Photo Upload Styles ── */
+.photo-upload-label {
+  display: block;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 2rem;
+  border: 2px dashed rgba(255,255,255,0.3);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  transition: all 0.3s ease;
+}
+
+.photo-upload-label:hover .photo-placeholder {
+  border-color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.1);
+}
+
+.photo-icon {
+  font-size: 2.5rem;
+}
+
+.photo-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  text-align: center;
+}
+
+.photo-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.1);
+}
+
+.photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.change-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photo-upload-label:hover .change-label {
+  opacity: 1;
+}

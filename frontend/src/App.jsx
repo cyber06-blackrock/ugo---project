@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import RideRequest from './pages/RideRequest';
 import DriverOnboarding from './pages/DriverOnboarding';
 import About from './pages/About';
@@ -12,6 +13,7 @@ import Package from './pages/Package';
 import Reserve from './pages/Reserve';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import SimpleSignup from './pages/SimpleSignup';
 import Landing from './pages/Landing';
 import Footer from './components/Footer';
 import LocationGate from './components/LocationGate';
@@ -162,6 +164,7 @@ function AppContent() {
           <Route path="/" element={<Landing />} />
           <Route path="/ride" element={<Home userLocation={userLocation} />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/request-ride" element={<RideRequest />} />
           <Route path="/driver-onboarding" element={<DriverOnboarding />} />
           <Route path="/business" element={<Business />} />
@@ -172,6 +175,7 @@ function AppContent() {
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/simple-signup" element={<SimpleSignup />} />
         </Routes>
       </main>
 

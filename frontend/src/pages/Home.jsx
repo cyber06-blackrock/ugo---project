@@ -411,6 +411,28 @@ const Home = ({ userLocation }) => {
           </div>
         </div>
 
+        {/* ── Amer Fort Promo Banner ── */}
+        <div className="promo-row promo-row--highlight">
+          <div className="promo-img-container promo-img--featured">
+            <img
+              src="https://images.unsplash.com/photo-1577891038432-f37ea6f6d399?auto=format&fit=crop&q=80&w=900"
+              alt="Amer Fort Jaipur - Pink City Landmark"
+              className="promo-img promo-img--large"
+              loading="lazy"
+              onError={(e) => {
+                e.target.src = "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&q=80&w=900";
+              }}
+            />
+          </div>
+          <div className="promo-text promo-text--overlay">
+            <h2>Explore Jaipur's Pink City</h2>
+            <p>From the majestic Amer Fort to Hawa Mahal, discover Jaipur's iconic landmarks with Ugo. Quick, reliable rides to every destination.</p>
+            <div className="promo-actions">
+              <button className="btn-secondary" onClick={() => navigate('/ride')}>Book a ride now</button>
+            </div>
+          </div>
+        </div>
+
         <div className="promo-row promo-row--reverse">
           <div className="promo-img-container">
             <img

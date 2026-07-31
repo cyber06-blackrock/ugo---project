@@ -60,6 +60,7 @@ const Landing = () => {
   const [dropoffSugg, setDropoffSugg] = useState([]);
   const [pickupFocus, setPickupFocus] = useState(false);
   const [dropoffFocus, setDropoffFocus] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const pickupTimeout = useRef(null);
   const dropoffTimeout = useRef(null);
@@ -125,7 +126,6 @@ const Landing = () => {
       navigate('/request-ride', { state: { pickup, dropoff } });
     }
   };
-  };
 
   const handleOptionClick = (opt) => {
     setSelectedOption(opt);
@@ -137,97 +137,111 @@ const Landing = () => {
   };
 
   return (
-    <div className="landing-container">
-      {/* ── Hero with Split Layout ── */}
-      <section className="hero-split">
-        <div className="hero-left">
-          <div className="location-tag">📍 Jaipur, Rajasthan</div>
-          <h1 className="hero-title">Your ride in the<br />Pink City 🌸</h1>
-          <p className="hero-desc">From Hawa Mahal to the Airport — Ugo gets you there.</p>
+    <div className="landing-page">
+      {/* ── Hero Section with Split Layout ── */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <div>
+            <div className="city-badge">📍 Jaipur, Rajasthan</div>
+            <h1>Your ride in the<br/>Pink City 🌸</h1>
+            <p>From Hawa Mahal to the Airport — Ugo gets you there.</p>
 
-          <div className="booking-widget">
-            <form onSubmit={handleRequestRide}>
-              <div className="input-row">
-                <div className="input-wrapper">
-                  <span className="input-icon">📍</span>
-                  <input
-                    type="text"
-                    placeholder="Pickup — e.g. Hawa Mahal"
-                    value={pickup}
-                    onChange={onPickupChange}
-                    onFocus={() => setPickupFocus(true)}
-                    onBlur={() => setTimeout(() => setPickupFocus(false), 200)}
-                  />
+            <div className="booking-widget">
+              <form onSubmit={handleRequestRide}>
+                <div className="lnd-input-block">
+                  <div className="lnd-input-wrap">
+                    <span className="dot"></span>
+                    <input
+                      type="text"
+                      placeholder="Pickup — e.g. Hawa Mahal"
+                      value={pickup}
+                      onChange={onPickupChange}
+                      onFocus={() => setPickupFocus(true)}
+                      onBlur={() => setTimeout(() => setPickupFocus(false), 200)}
+                    />
+                    <button type="button" className="locate-btn" title="Use current location">
+                      <Navigation size={16} />
+                    </button>
+                  </div>
                   {pickupFocus && pickupSugg.length > 0 && (
-                    <div className="suggestions">
+                    <ul className="lnd-sugg-list">
                       {pickupSugg.map((sugg, i) => (
-                        <div
+                        <li
                           key={i}
-                          className="suggestion"
                           onClick={() => { setPickup(sugg); setPickupFocus(false); }}
                         >
-                          {sugg}
-                        </div>
+                          <span className="lnd-sugg-icon">📍</span>
+                          <span className="lnd-sugg-name">{sugg}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   )}
                 </div>
-                <button type="button" className="locate-btn" title="Use current location">
-                  <Navigation size={16} />
-                </button>
-              </div>
 
-              <div className="input-row">
-                <div className="input-wrapper">
-                  <span className="input-icon">🏁</span>
-                  <input
-                    type="text"
-                    placeholder="Destination — e.g. Amer Fort"
-                    value={dropoff}
-                    onChange={onDropoffChange}
-                    onFocus={() => setDropoffFocus(true)}
-                    onBlur={() => setTimeout(() => setDropoffFocus(false), 200)}
-                  />
+                <div className="lnd-input-block">
+                  <div className="lnd-input-wrap">
+                    <span className="square"></span>
+                    <input
+                      type="text"
+                      placeholder="Destination — e.g. Amer Fort"
+                      value={dropoff}
+                      onChange={onDropoffChange}
+                      onFocus={() => setDropoffFocus(true)}
+                      onBlur={() => setTimeout(() => setDropoffFocus(false), 200)}
+                    />
+                  </div>
                   {dropoffFocus && dropoffSugg.length > 0 && (
-                    <div className="suggestions">
+                    <ul className="lnd-sugg-list">
                       {dropoffSugg.map((sugg, i) => (
-                        <div
+                        <li
                           key={i}
-                          className="suggestion"
                           onClick={() => { setDropoff(sugg); setDropoffFocus(false); }}
                         >
-                          {sugg}
-                        </div>
+                          <span className="lnd-sugg-icon">🏁</span>
+                          <span className="lnd-sugg-name">{sugg}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   )}
                 </div>
-              </div>
 
-              <button type="submit" className="request-btn">See prices</button>
-            </form>
-          </div>
+                <button type="submit" className="full-width">See prices</button>
+              </form>
+            </div>
 
-          <div className="landmark-chips">
-            <div className="chip" onClick={() => setDropoff('Jaipur Airport, Jaipur')}>✈️ Jaipur Airport</div>
-            <div className="chip" onClick={() => setDropoff('Jaipur Railway Station, Jaipur')}>🚂 Railway Station</div>
-            <div className="chip" onClick={() => setDropoff('Hawa Mahal, Jaipur')}>🏯 Hawa Mahal</div>
-            <div className="chip" onClick={() => setDropoff('Amer Fort, Jaipur')}>🏰 Amer Fort</div>
+            <div className="lnd-chips">
+              <div className="lnd-chip" onClick={() => setDropoff('Jaipur Airport, Jaipur')}>✈️ Airport</div>
+              <div className="lnd-chip" onClick={() => setDropoff('Jaipur Railway Station, Jaipur')}>🚂 Railway Station</div>
+              <div className="lnd-chip" onClick={() => setDropoff('Hawa Mahal, Jaipur')}>🏯 Hawa Mahal</div>
+              <div className="lnd-chip" onClick={() => setDropoff('Amer Fort, Jaipur')}>🏰 Amer Fort</div>
+            </div>
           </div>
         </div>
 
-        <div className="hero-right">
-          <img
-            src="https://images.unsplash.com/photo-1597177557607-ae03d2bda3b0?auto=format&fit=crop&q=80&w=800"
-            alt="Amber Fort - Jaipur"
-            className="hero-image"
-            loading="lazy"
-            onError={(e) => {
-              e.target.src = "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&q=80&w=800";
-            }}
-          />
+        <div
+          className="hero-image"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1577891038432-f37ea6f6d399?auto=format&fit=crop&q=80&w=900')"
+          }}
+        >
+          <div className="hero-image-overlay">
+            <div className="hero-highlights">
+              <div className="hero-highlight-chip">🏰 Amer Fort</div>
+              <div className="hero-highlight-chip">🏯 Hawa Mahal</div>
+              <div className="hero-highlight-chip">🌸 Pink City</div>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* ── Stats Bar ── */}
+      <div className="stats-bar">
+        <div className="stat-item"><strong>50K+</strong> riders</div>
+        <div className="stat-divider"></div>
+        <div className="stat-item"><strong>24/7</strong> support</div>
+        <div className="stat-divider"></div>
+        <div className="stat-item"><strong>4.8★</strong> rated</div>
+      </div>
 
       {/* ── Ways to ride ── */}
       <section className="ways-to-ride">
@@ -241,15 +255,9 @@ const Landing = () => {
                   <img 
                     src={opt.image} 
                     alt={opt.title}
+                    loading="lazy"
                     onError={(e) => {
-                      // Fallback image for auto-rickshaw if main image fails to load
-                      if (opt.id === 'auto') {
-                        e.target.src = 'https://images.unsplash.com/photo-1609695001873-3297510ef4c3?auto=format&fit=crop&q=80&w=600';
-                      }
-                      // Fallback image for bike if main image fails to load
-                      if (opt.id === 'bike') {
-                        e.target.src = 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=600';
-                      }
+                      e.target.src = 'https://images.unsplash.com/photo-1544589552-1c4d649e0c30?auto=format&fit=crop&q=80&w=600';
                     }}
                   />
                   <div className="card-emoji">{opt.emoji}</div>
@@ -260,7 +268,7 @@ const Landing = () => {
                     <span className="card-from">{opt.from}</span>
                   </div>
                   <p>{opt.desc}</p>
-                  <button className="view-details-btn">Book now</button>
+                  <button type="button" className="view-details-btn">Book now</button>
                 </div>
               </div>
             ))}
@@ -311,28 +319,28 @@ const Landing = () => {
             <div className="step">
               <div className="step-icon">📍</div>
               <div className="step-text">
-                <h3>1. Enter your destination</h3>
+                <h3>Enter your destination</h3>
                 <p>Open the app and enter where you want to go.</p>
               </div>
             </div>
             <div className="step">
               <div className="step-icon">🚗</div>
               <div className="step-text">
-                <h3>2. Meet your driver</h3>
+                <h3>Meet your driver</h3>
                 <p>You'll see your driver's picture and vehicle details, and can track their arrival.</p>
               </div>
             </div>
             <div className="step">
               <div className="step-icon">🏁</div>
               <div className="step-text">
-                <h3>3. Check the route</h3>
+                <h3>Check the route</h3>
                 <p>Always check that your trip route matches where you want to go.</p>
               </div>
             </div>
             <div className="step">
               <div className="step-icon">⭐</div>
               <div className="step-text">
-                <h3>4. Enjoy the ride</h3>
+                <h3>Enjoy the ride</h3>
                 <p>Sit back and relax. Your driver knows the best routes in Jaipur.</p>
               </div>
             </div>
@@ -345,25 +353,25 @@ const Landing = () => {
         <div className="container">
           <div className="split">
             <div className="text-content">
-              <div className="promo-tag">Jaipur's Pink City</div>
-              <h2>Your reliable ride, anytime in Jaipur</h2>
+              <div className="promo-tag">🌸 Jaipur's Pink City</div>
+              <h2>Your reliable ride, anytime</h2>
               <p>
                 Whether you're exploring the historic forts, shopping in Johari Bazaar, or heading to the airport, 
-                Ugo connects you with reliable rides across the Pink City.
+                Ugo connects you with reliable rides across the Pink City. Safe, quick, and affordable.
               </p>
               <div className="promo-chips">
-                <span><ShieldCheck size={14} /> Safe</span>
-                <span><Star size={14} /> Reliable</span>
-                <span><Clock size={14} /> Quick</span>
+                <span><ShieldCheck size={14} /> Safe & Verified</span>
+                <span><Star size={14} /> Highly Rated</span>
+                <span><Clock size={14} /> Quick Pickup</span>
               </div>
               <button className="btn-secondary" onClick={() => navigate('/signup')}>
-                Sign up
+                Get started
               </button>
             </div>
             <div
               className="image-content"
               style={{
-                backgroundImage: "url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&q=80&w=800')"
+                backgroundImage: "url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&q=80&w=900')"
               }}
             />
           </div>
@@ -382,7 +390,7 @@ const Landing = () => {
             <button className="btn-primary" onClick={() => navigate('/driver-signup')}>
               Start earning
             </button>
-            <button className="btn-secondary" onClick={() => navigate('/learn-more')}>
+            <button className="btn-ghost" onClick={() => navigate('/learn-more')}>
               Learn more
             </button>
           </div>
@@ -393,24 +401,32 @@ const Landing = () => {
       {selectedOption && (
         <div className="modal-overlay" onClick={() => setSelectedOption(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedOption(null)}>
-              ✕
-            </button>
-            <img src={selectedOption.image} alt={selectedOption.title} />
-            <div className="modal-body">
-              <div className="modal-title">
+            <div className="modal-header">
+              <img src={selectedOption.image} alt={selectedOption.title} className="modal-img" />
+              <button className="close-btn" onClick={() => setSelectedOption(null)}>
+                ✕
+              </button>
+              <div className="modal-header-text">
                 <span className="modal-emoji">{selectedOption.emoji}</span>
                 <h3>{selectedOption.title}</h3>
               </div>
-              <p>{selectedOption.desc}</p>
-              <div className="modal-price">Starting at {selectedOption.from}</div>
-              <button
-                className="modal-cta"
-                onClick={() => handleOptionClick(selectedOption)}
-              >
+            </div>
+            <form className="modal-form" onSubmit={() => handleOptionClick(selectedOption)}>
+              <div className="input-group">
+                <label>Ride type</label>
+                <input type="text" value={selectedOption.title} disabled />
+              </div>
+              <div className="input-group">
+                <label>Description</label>
+                <input type="text" value={selectedOption.desc} disabled />
+              </div>
+              <div className="input-group">
+                <label>Starting price: {selectedOption.from}</label>
+              </div>
+              <button type="submit" className="full-width modal-submit">
                 {selectedOption.id === 'reserve' ? 'Schedule ride' : 'Request now'}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

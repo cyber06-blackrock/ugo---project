@@ -870,3 +870,81 @@
   letter-spacing: 0.05em;
   color: #666;
 }
+
+
+/* ── Amer Fort Promo Banner Styles ── */
+.promo-row--highlight {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.promo-row--highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.promo-img--featured {
+  position: relative;
+  z-index: 1;
+}
+
+.promo-img--large {
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.promo-text--overlay {
+  position: relative;
+  z-index: 2;
+}
+
+.promo-row--highlight .promo-text h2 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.promo-row--highlight .promo-text p {
+  color: rgba(255,255,255,0.9);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.promo-row--highlight .btn-secondary {
+  background: #fff;
+  color: #1a1a2e;
+  font-weight: 700;
+  border: none;
+}
+
+.promo-row--highlight .btn-secondary:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .promo-row--highlight {
+    flex-direction: column !important;
+  }
+  
+  .promo-row--highlight .promo-img-container {
+    min-height: 300px;
+    width: 100% !important;
+  }
+  
+  .promo-row--highlight .promo-text h2 {
+    font-size: 1.5rem;
+  }
+}

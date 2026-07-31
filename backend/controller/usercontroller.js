@@ -1,5 +1,6 @@
 const User = require('../Models/user');
 const jwt  = require('jsonwebtoken');
+const { mockDb, isUsingMockDb } = require('../config/db');
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const generateToken = (id) =>
@@ -13,7 +14,7 @@ const isValidPhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));
 //   1. Quick signup  → name + phone  (OTP-verified, no password)
 //   2. Email signup  → name + email + password
 const registerUser = async (req, res) => {
-  const { name, email, phone, password, role, quickSignup } = req.body;
+  const { name, email, phone, password, role, quickSignup, profilePhoto } = req.body;
 
   // ── Name required always ──
   if (!name || !name.trim()) {
@@ -48,7 +49,43 @@ const registerUser = async (req, res) => {
   const userRole = ['rider', 'driver'].includes(role) ? role : 'rider';
 
   try {
-    // ── Duplicate check ──
+    // ── Use Mock DB if MongoDB not connected ──
+    if (isUsingMockDb && isUsingMockDb()) {
+      // Duplicate check - mock db
+      if (email) {
+        const exists = await mockDb.findUserByEmail(email.trim().toLowerCase());
+        if (exists) return res.status(400).json({ message: 'An account with this email already exists.' });
+      }
+      if (phone) {
+        const cleaned = phone.replace(/\D/g, '');
+        const exists = await mockDb.findUserByPhone(cleaned);
+        if (exists) return res.status(400).json({ message: 'An account with this phone number already exists.' });
+      }
+
+      // Create user in mock db
+      const userData = {
+        name: trimmedName,
+        role: userRole,
+        email: email ? email.trim().toLowerCase() : null,
+        phone: phone ? phone.replace(/\D/g, '') : null,
+        password: password || null,
+        profilePhoto: profilePhoto || '',
+      };
+
+      const user = await mockDb.createUser(userData);
+
+      return res.status(201).json({
+        _id:   user._id,
+        name:  user.name,
+        email: user.email,
+        phone: user.phone,
+        role:  user.role,
+        profilePhoto: user.profilePhoto,
+        token: generateToken(user._id),
+      });
+    }
+
+    // ── Duplicate check - MongoDB ──
     if (email) {
       const exists = await User.findOne({ email: email.trim().toLowerCase() });
       if (exists) return res.status(400).json({ message: 'An account with this email already exists.' });
@@ -59,10 +96,11 @@ const registerUser = async (req, res) => {
       if (exists) return res.status(400).json({ message: 'An account with this phone number already exists.' });
     }
 
-    // ── Create user ──
+    // ── Create user - MongoDB ──
     const userData = {
       name: trimmedName,
       role: userRole,
+      profilePhoto: profilePhoto || '',
     };
     if (email)    userData.email    = email.trim().toLowerCase();
     if (phone)    userData.phone    = phone.replace(/\D/g, '');
@@ -76,6 +114,7 @@ const registerUser = async (req, res) => {
       email: user.email  || null,
       phone: user.phone  || null,
       role:  user.role,
+      profilePhoto: user.profilePhoto || '',
       token: generateToken(user._id),
     });
 
@@ -98,6 +137,25 @@ const authUser = async (req, res) => {
   }
 
   try {
+    // ── Check mock db first ──
+    if (isUsingMockDb && isUsingMockDb()) {
+      const user = await mockDb.findUserByEmail(email.trim().toLowerCase());
+      
+      if (user && user.password === password) {
+        return res.json({
+          _id:   user._id,
+          name:  user.name,
+          email: user.email,
+          phone: user.phone || null,
+          role:  user.role,
+          token: generateToken(user._id),
+        });
+      }
+      
+      return res.status(401).json({ message: 'Invalid email or password.' });
+    }
+
+    // ── Check MongoDB ──
     const user = await User.findOne({ email: email.trim().toLowerCase() });
 
     if (user && (await user.matchPassword(password))) {
@@ -121,6 +179,16 @@ const authUser = async (req, res) => {
 // ── @route   GET /api/users/profile ────────────────────────────────────────
 const getUserProfile = async (req, res) => {
   try {
+    // ── Check mock db ──
+    if (isUsingMockDb && isUsingMockDb()) {
+      const user = await mockDb.findUserById(req.user._id);
+      if (!user) return res.status(404).json({ message: 'User not found.' });
+      
+      const { password, ...userWithoutPassword } = user;
+      return res.json(userWithoutPassword);
+    }
+
+    // ── Check MongoDB ──
     const user = await User.findById(req.user._id).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found.' });
     res.json(user);
@@ -129,4 +197,46 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, authUser, getUserProfile };
+// ── @route   GET /api/users/all ────────────────────────────────────────────
+// Get all registered users (admin only)
+const getAllUsers = async (req, res) => {
+  try {
+    // ── Check mock db ──
+    if (isUsingMockDb && isUsingMockDb()) {
+      const users = await mockDb.getAllUsers();
+      const cleanedUsers = users
+        .map(u => {
+          const { password, ...rest } = u;
+          return rest;
+        })
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      console.log(`📊 Fetched ${cleanedUsers.length} users from mock database`);
+      
+      return res.json({
+        total: cleanedUsers.length,
+        users: cleanedUsers,
+        source: 'mock-database'
+      });
+    }
+
+    // ── Check MongoDB ──
+    const users = await User.find()
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log(`📊 Fetched ${users.length} users from MongoDB`);
+
+    res.json({
+      total: users.length,
+      users: users,
+      source: 'mongodb'
+    });
+  } catch (error) {
+    console.error('Get users error:', error.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
+};
+
+module.exports = { registerUser, authUser, getUserProfile, getAllUsers };
