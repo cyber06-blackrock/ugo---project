@@ -1,8 +1,44 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Navigation } from 'lucide-react';
+import { Navigation, ShieldCheck, Star, Clock, MapPin } from 'lucide-react';
 import { getNearbyPlaces, JAIPUR_CENTER } from '../utils/jaipur';
 import './Landing.css';
+
+// ── Ride options data ─────────────────────────────────────────────────────
+const rideOptions = [
+  {
+    id: 'car',
+    title: 'UgoX',
+    emoji: '🚗',
+    from: '₹30/km',
+    image: 'https://images.unsplash.com/photo-1549399542-7e3f3b76fc5d?auto=format&fit=crop&q=80&w=600',
+    desc: 'Comfortable sedans for everyday rides across Jaipur — Amer Fort to Airport.',
+  },
+  {
+    id: 'auto',
+    title: 'UgoAuto',
+    emoji: '🏎️',
+    from: '₹16/km',
+    image: 'https://images.unsplash.com/photo-1609695001873-3297510ef4c3?auto=format&fit=crop&q=80&w=600',
+    desc: 'Beat the Pink City traffic with quick, affordable auto-rickshaw rides.',
+  },
+  {
+    id: 'bike',
+    title: 'UgoMoto',
+    emoji: '🏍️',
+    from: '₹12/km',
+    image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=600',
+    desc: 'Zip through Johari Bazaar and Old City lanes on a motorbike.',
+  },
+  {
+    id: 'xl',
+    title: 'UgoXL',
+    emoji: '🚙',
+    from: '₹48/km',
+    image: 'https://images.unsplash.com/photo-1555636222-cff2045dd1f7?auto=format&fit=crop&q=80&w=600',
+    desc: 'Spacious SUVs for family trips to Amer Fort or group outings.',
+  },
+];
 
 // ── Jaipur landmark highlights ─────────────────────────────────────────────
 const CITY_HIGHLIGHTS = [
