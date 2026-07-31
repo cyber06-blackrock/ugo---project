@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Navigation, ShieldCheck, Star, Clock, MapPin } from 'lucide-react';
-import { getNearbyPlaces, QUICK_SPOTS, JAIPUR_CENTER } from '../utils/jaipur';
+import { Navigation } from 'lucide-react';
+import { getNearbyPlaces, JAIPUR_CENTER } from '../utils/jaipur';
 import './Landing.css';
-import { rideOptions } from './Package';
 
 // ── Jaipur landmark highlights ─────────────────────────────────────────────
 const CITY_HIGHLIGHTS = [
@@ -16,25 +15,19 @@ const CITY_HIGHLIGHTS = [
 ];
 
 const Landing = () => {
-  const navigate  = useNavigate();
-
-  // User GPS coords (Jaipur centre fallback)
+  const navigate = useNavigate();
   const [userLat, setUserLat] = useState(JAIPUR_CENTER.lat);
   const [userLng, setUserLng] = useState(JAIPUR_CENTER.lng);
-
-  const [pickup,       setPickup]       = useState('');
-  const [dropoff,      setDropoff]      = useState('');
-  const [pickupSugg,   setPickupSugg]   = useState([]);
-  const [dropoffSugg,  setDropoffSugg]  = useState([]);
-  const [pickupFocus,  setPickupFocus]  = useState(false);
+  const [pickup, setPickup] = useState('');
+  const [dropoff, setDropoff] = useState('');
+  const [pickupSugg, setPickupSugg] = useState([]);
+  const [dropoffSugg, setDropoffSugg] = useState([]);
+  const [pickupFocus, setPickupFocus] = useState(false);
   const [dropoffFocus, setDropoffFocus] = useState(false);
 
-  const [selectedOption, setSelectedOption] = useState(null);
-
-  const pickupTimeout  = useRef(null);
+  const pickupTimeout = useRef(null);
   const dropoffTimeout = useRef(null);
 
-  // ── GPS location handler ─────────────────────────────────────────────────
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -42,18 +35,15 @@ const Landing = () => {
           setUserLat(pos.coords.latitude);
           setUserLng(pos.coords.longitude);
         },
-        () => {
-          console.log('Location access denied; using Jaipur center');
-        }
+        () => console.log('Location access denied; using Jaipur center')
       );
     }
   }, []);
 
-  // ── Autocomplete with Jaipur bias ──────────────────────────────────────────
   const fetchSuggestions = async (query, type) => {
     if (!query || query.length < 2) {
       const nearby = getNearbyPlaces(query, userLat, userLng, 6);
-      const names  = nearby.map(p => `${p.name}, Jaipur`);
+      const names = nearby.map(p => `${p.name}, Jaipur`);
       if (type === 'pickup') setPickupSugg(names);
       else setDropoffSugg(names);
       return;
@@ -99,6 +89,7 @@ const Landing = () => {
       navigate('/request-ride', { state: { pickup, dropoff } });
     }
   };
+  };
 
   const handleOptionClick = (opt) => {
     setSelectedOption(opt);
@@ -111,100 +102,94 @@ const Landing = () => {
 
   return (
     <div className="landing-container">
-      {/* ── Hero ── */}
-      <section className="hero">
-        <div className="hero-content">
-          <div className="hero-text">
-            <h1>Request a ride now</h1>
-            <div className="booking-widget">
-              <form onSubmit={handleRequestRide}>
-                <div className="input-row">
-                  <div className="input-wrapper">
-                    <span className="input-icon">📍</span>
-                    <input
-                      type="text"
-                      placeholder="Pickup location"
-                      value={pickup}
-                      onChange={onPickupChange}
-                      onFocus={() => setPickupFocus(true)}
-                      onBlur={() => setTimeout(() => setPickupFocus(false), 200)}
-                    />
-                    {pickupFocus && pickupSugg.length > 0 && (
-                      <div className="suggestions">
-                        {pickupSugg.map((sugg, i) => (
-                          <div
-                            key={i}
-                            className="suggestion"
-                            onClick={() => { setPickup(sugg); setPickupFocus(false); }}
-                          >
-                            {sugg}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <button type="button" className="locate-btn" title="Use current location">
-                    <Navigation size={16} />
-                  </button>
+      {/* ── Hero with Split Layout ── */}
+      <section className="hero-split">
+        <div className="hero-left">
+          <div className="location-tag">📍 Jaipur, Rajasthan</div>
+          <h1 className="hero-title">Your ride in the<br />Pink City 🌸</h1>
+          <p className="hero-desc">From Hawa Mahal to the Airport — Ugo gets you there.</p>
+
+          <div className="booking-widget">
+            <form onSubmit={handleRequestRide}>
+              <div className="input-row">
+                <div className="input-wrapper">
+                  <span className="input-icon">📍</span>
+                  <input
+                    type="text"
+                    placeholder="Pickup — e.g. Hawa Mahal"
+                    value={pickup}
+                    onChange={onPickupChange}
+                    onFocus={() => setPickupFocus(true)}
+                    onBlur={() => setTimeout(() => setPickupFocus(false), 200)}
+                  />
+                  {pickupFocus && pickupSugg.length > 0 && (
+                    <div className="suggestions">
+                      {pickupSugg.map((sugg, i) => (
+                        <div
+                          key={i}
+                          className="suggestion"
+                          onClick={() => { setPickup(sugg); setPickupFocus(false); }}
+                        >
+                          {sugg}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                <div className="input-row">
-                  <div className="input-wrapper">
-                    <span className="input-icon">🏁</span>
-                    <input
-                      type="text"
-                      placeholder="Dropoff destination"
-                      value={dropoff}
-                      onChange={onDropoffChange}
-                      onFocus={() => setDropoffFocus(true)}
-                      onBlur={() => setTimeout(() => setDropoffFocus(false), 200)}
-                    />
-                    {dropoffFocus && dropoffSugg.length > 0 && (
-                      <div className="suggestions">
-                        {dropoffSugg.map((sugg, i) => (
-                          <div
-                            key={i}
-                            className="suggestion"
-                            onClick={() => { setDropoff(sugg); setDropoffFocus(false); }}
-                          >
-                            {sugg}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <button type="submit" className="request-btn">See prices</button>
-              </form>
-
-              <div className="schedule-link">
-                <button onClick={() => navigate('/reserve')}>
-                  <Clock size={16} />
-                  Schedule for later
+                <button type="button" className="locate-btn" title="Use current location">
+                  <Navigation size={16} />
                 </button>
               </div>
-            </div>
+
+              <div className="input-row">
+                <div className="input-wrapper">
+                  <span className="input-icon">🏁</span>
+                  <input
+                    type="text"
+                    placeholder="Destination — e.g. Amer Fort"
+                    value={dropoff}
+                    onChange={onDropoffChange}
+                    onFocus={() => setDropoffFocus(true)}
+                    onBlur={() => setTimeout(() => setDropoffFocus(false), 200)}
+                  />
+                  {dropoffFocus && dropoffSugg.length > 0 && (
+                    <div className="suggestions">
+                      {dropoffSugg.map((sugg, i) => (
+                        <div
+                          key={i}
+                          className="suggestion"
+                          onClick={() => { setDropoff(sugg); setDropoffFocus(false); }}
+                        >
+                          {sugg}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button type="submit" className="request-btn">See prices</button>
+            </form>
           </div>
 
-          <div className="hero-landmarks">
-            <h3>Popular in Jaipur</h3>
-            <div className="landmarks-grid">
-              {CITY_HIGHLIGHTS.map((place, i) => (
-                <div
-                  key={i}
-                  className="landmark"
-                  onClick={() => setDropoff(`${place.name}, Jaipur`)}
-                >
-                  <span className="landmark-icon">{place.icon}</span>
-                  <div className="landmark-info">
-                    <div className="landmark-name">{place.name}</div>
-                    <div className="landmark-area">{place.area}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="landmark-chips">
+            <div className="chip" onClick={() => setDropoff('Jaipur Airport, Jaipur')}>✈️ Jaipur Airport</div>
+            <div className="chip" onClick={() => setDropoff('Jaipur Railway Station, Jaipur')}>🚂 Railway Station</div>
+            <div className="chip" onClick={() => setDropoff('Hawa Mahal, Jaipur')}>🏯 Hawa Mahal</div>
+            <div className="chip" onClick={() => setDropoff('Amer Fort, Jaipur')}>🏰 Amer Fort</div>
           </div>
+        </div>
+
+        <div className="hero-right">
+          <img
+            src="https://images.unsplash.com/photo-1597177557607-ae03d2bda3b0?auto=format&fit=crop&q=80&w=800"
+            alt="Amber Fort - Jaipur"
+            className="hero-image"
+            loading="lazy"
+            onError={(e) => {
+              e.target.src = "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&q=80&w=800";
+            }}
+          />
         </div>
       </section>
 
