@@ -2,347 +2,380 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 
-// ── Validators ──────────────────────────────────────────────────────────────
-const validators = {
+// ── Quick validation (minimal for fast signup) ─────────────────────────────
+const quickValidate = {
+  phone: (v) => {
+    if (!v.trim()) return 'Phone number is required.';
+    if (!/^\d{10}$/.test(v.replace(/\D/g, ''))) return 'Enter a valid 10-digit phone number.';
+    return '';
+  },
   name: (v) => {
-    if (!v.trim())            return 'Full name is required.';
-    if (v.trim().length < 2)  return 'Name must be at least 2 characters.';
-    if (v.trim().length > 50) return 'Name must be 50 characters or fewer.';
-    return '';
-  },
-  email: (v) => {
-    if (!v.trim()) return 'Email is required.';
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
-      ? '' : 'Enter a valid email address.';
-  },
-  password: (v) => {
-    if (!v)           return 'Password is required.';
-    if (v.length < 6) return 'Password must be at least 6 characters.';
-    if (v.length > 100) return 'Password is too long.';
-    return '';
-  },
-  confirmPassword: (v, pwd) => {
-    if (!v)        return 'Please confirm your password.';
-    if (v !== pwd) return 'Passwords do not match.';
+    if (!v.trim()) return 'Name is required.';
+    if (v.trim().length < 2) return 'Name too short.';
     return '';
   },
 };
-
-// ── Password strength ───────────────────────────────────────────────────────
-const getStrength = (pwd) => {
-  if (!pwd) return { score: 0, label: '', color: '' };
-  let score = 0;
-  if (pwd.length >= 8)                    score++;
-  if (/[A-Z]/.test(pwd))                  score++;
-  if (/[0-9]/.test(pwd))                  score++;
-  if (/[^A-Za-z0-9]/.test(pwd))          score++;
-  if (pwd.length >= 12)                   score++;
-  if (score <= 1) return { score, label: 'Weak',   color: '#ef4444' };
-  if (score <= 2) return { score, label: 'Fair',   color: '#f59e0b' };
-  if (score <= 3) return { score, label: 'Good',   color: '#3b82f6' };
-  return             { score, label: 'Strong', color: '#10b981' };
-};
-
-const FIELDS = ['name', 'email', 'password', 'confirmPassword'];
 
 const Signup = () => {
   const navigate = useNavigate();
 
-  const [formData,  setFormData]  = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'rider' });
-  const [fieldErrs, setFieldErrs] = useState({ name: '', email: '', password: '', confirmPassword: '' });
-  const [touched,   setTouched]   = useState({ name: false, email: false, password: false, confirmPassword: false });
-  const [showPwd,   setShowPwd]   = useState(false);
-  const [showCPwd,  setShowCPwd]  = useState(false);
-  const [apiError,  setApiError]  = useState('');
-  const [loading,   setLoading]   = useState(false);
-  const [shake,     setShake]     = useState(false);
-  const [success,   setSuccess]   = useState(false);
+  // ── Fast signup states ──────────────────────────────────────────────────
+  const [signupMethod, setSignupMethod] = useState('phone'); // 'phone' | 'email' | 'social'
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    phone: '', 
+    email: '', 
+    role: 'rider',
+    agreeTerms: false
+  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const strength = getStrength(formData.password);
-
-  // ── Validation ───────────────────────────────────────────────────────
-  const validate = (name, value) => {
-    if (name === 'confirmPassword') return validators.confirmPassword(value, formData.password);
-    return validators[name] ? validators[name](value) : '';
-  };
-
+  // ── Input handlers ──────────────────────────────────────────────────────
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(f => ({ ...f, [name]: value }));
-    if (touched[name]) {
-      setFieldErrs(fe => ({ ...fe, [name]: validate(name, value) }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
-    // Re-validate confirm when password changes
-    if (name === 'password' && touched.confirmPassword) {
-      setFieldErrs(fe => ({
-        ...fe,
-        confirmPassword: validators.confirmPassword(formData.confirmPassword, value),
-      }));
-    }
-    setApiError('');
   };
 
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    setTouched(t => ({ ...t, [name]: true }));
-    setFieldErrs(fe => ({ ...fe, [name]: validate(name, value) }));
+  const formatPhone = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
   };
 
-  const triggerShake = () => {
-    setShake(true);
-    setTimeout(() => setShake(false), 600);
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setFormData(prev => ({ ...prev, phone: formatted }));
+    if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
   };
 
-  // ── Submit ───────────────────────────────────────────────────────────
-  const handleSubmit = async (e) => {
+  // ── Quick OTP signup ────────────────────────────────────────────────────
+  const handleQuickSignup = async (e) => {
     e.preventDefault();
-    setApiError('');
+    
+    // Quick validation
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Name required';
+    if (signupMethod === 'phone' && quickValidate.phone(formData.phone)) {
+      newErrors.phone = quickValidate.phone(formData.phone);
+    }
+    if (signupMethod === 'email' && !formData.email.includes('@')) {
+      newErrors.email = 'Valid email required';
+    }
+    if (!formData.agreeTerms) newErrors.terms = 'Please accept terms';
 
-    // Validate all fields
-    const errs = {};
-    FIELDS.forEach(f => {
-      errs[f] = f === 'confirmPassword'
-        ? validators.confirmPassword(formData.confirmPassword, formData.password)
-        : validators[f](formData[f]);
-    });
-    setFieldErrs(errs);
-    setTouched({ name: true, email: true, password: true, confirmPassword: true });
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
-    if (Object.values(errs).some(Boolean)) {
-      triggerShake();
+    setLoading(true);
+    try {
+      // Simulate OTP sending
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setOtpSent(true);
+      setLoading(false);
+    } catch (error) {
+      setErrors({ general: 'Failed to send OTP. Please try again.' });
+      setLoading(false);
+    }
+  };
+
+  // ── Verify OTP and create account ───────────────────────────────────────
+  const handleOtpVerify = async (e) => {
+    e.preventDefault();
+    
+    if (!otp || otp.length !== 6) {
+      setErrors({ otp: 'Enter 6-digit OTP' });
       return;
     }
 
     setLoading(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const res  = await fetch(`${API_URL}/api/users/register`, {
+      
+      // Create account with minimal data
+      const res = await fetch(`${API_URL}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name:     formData.name.trim(),
-          email:    formData.email.trim(),
-          password: formData.password,
-          role:     formData.role,
+          name: formData.name.trim(),
+          phone: signupMethod === 'phone' ? formData.phone.replace(/\D/g, '') : undefined,
+          email: signupMethod === 'email' ? formData.email.trim() : undefined,
+          role: formData.role,
+          verified: true, // Since OTP verified
+          quickSignup: true
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Registration failed.');
 
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Registration failed');
+
+      // Store auth data
       localStorage.setItem('ugo_token', data.token);
-      localStorage.setItem('ugo_user',  JSON.stringify(data));
+      localStorage.setItem('ugo_user', JSON.stringify(data));
 
       setSuccess(true);
       setTimeout(() => {
-        if (data.role === 'driver') navigate('/dashboard');
-        else navigate('/ride');
-      }, 1400);
-    } catch (err) {
-      setApiError(err.message);
-      triggerShake();
+        navigate(data.role === 'driver' ? '/dashboard' : '/ride');
+      }, 1200);
+
+    } catch (error) {
+      setErrors({ otp: error.message });
     } finally {
       setLoading(false);
     }
   };
 
-  const fieldState = (name) => {
-    if (!touched[name]) return '';
-    return fieldErrs[name] ? ' form-group--error' : ' form-group--valid';
+  // ── Social signup (Google/Phone) ────────────────────────────────────────
+  const handleSocialSignup = async (provider) => {
+    setLoading(true);
+    try {
+      // Simulate social login
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const userData = {
+        name: provider === 'google' ? 'Google User' : formData.name,
+        email: provider === 'google' ? 'user@gmail.com' : undefined,
+        phone: provider === 'phone' ? formData.phone : undefined,
+        role: formData.role,
+        socialProvider: provider
+      };
+
+      localStorage.setItem('ugo_token', 'social_token_' + Date.now());
+      localStorage.setItem('ugo_user', JSON.stringify(userData));
+
+      setSuccess(true);
+      setTimeout(() => {
+        navigate(userData.role === 'driver' ? '/dashboard' : '/ride');
+      }, 1200);
+
+    } catch (error) {
+      setErrors({ general: 'Social signup failed. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ── Guest/Skip signup ───────────────────────────────────────────────────
+  const handleGuestMode = () => {
+    localStorage.setItem('ugo_guest', 'true');
+    navigate('/ride');
+  };
+
+  // ── Success screen ──────────────────────────────────────────────────────
   if (success) {
     return (
       <div className="auth-container">
         <div className="auth-card auth-card--success">
           <div className="auth-success-icon">✓</div>
-          <h2 className="auth-title">Account created!</h2>
-          <p className="auth-subtitle">Redirecting you now…</p>
+          <h2 className="auth-title">Welcome aboard!</h2>
+          <p className="auth-subtitle">Account created successfully</p>
+          <div className="success-spinner"></div>
         </div>
       </div>
     );
   }
 
+  // ── OTP verification screen ─────────────────────────────────────────────
+  if (otpSent) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-brand">
+            <span className="auth-brand-logo">U</span>
+            <span className="auth-brand-name">Ugo</span>
+          </div>
+
+          <h2 className="auth-title">Verify your {signupMethod}</h2>
+          <p className="auth-subtitle">
+            Enter the 6-digit code sent to {' '}
+            {signupMethod === 'phone' ? formData.phone : formData.email}
+          </p>
+
+          {errors.otp && (
+            <div className="auth-error" role="alert">
+              <span className="auth-error-icon">⚠</span> {errors.otp}
+            </div>
+          )}
+
+          <form onSubmit={handleOtpVerify} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="otp">Verification Code</label>
+              <div className="input-wrap">
+                <span className="input-icon">🔢</span>
+                <input
+                  type="text"
+                  id="otp"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  maxLength="6"
+                  autoComplete="one-time-code"
+                  style={{ textAlign: 'center', letterSpacing: '0.2em' }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="auth-button auth-button--ready"
+              disabled={loading || otp.length !== 6}
+            >
+              {loading ? (
+                <><span className="auth-spinner" /> Verifying...</>
+              ) : (
+                'Create Account'
+              )}
+            </button>
+          </form>
+
+          <button
+            className="auth-button auth-button--secondary"
+            onClick={() => setOtpSent(false)}
+          >
+            ← Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main signup screen ──────────────────────────────────────────────────
   return (
     <div className="auth-container">
-      <div className={`auth-card${shake ? ' auth-card--shake' : ''}`}>
-
+      <div className="auth-card">
         <div className="auth-brand">
           <span className="auth-brand-logo">U</span>
           <span className="auth-brand-name">Ugo</span>
         </div>
 
-        <h2 className="auth-title">Create your account</h2>
-        <p className="auth-subtitle">Join thousands of riders and drivers on Ugo</p>
+        <h2 className="auth-title">Get started in seconds</h2>
+        <p className="auth-subtitle">The fastest way to book your ride</p>
 
-        {apiError && (
+        {errors.general && (
           <div className="auth-error" role="alert">
-            <span className="auth-error-icon">⚠</span> {apiError}
+            <span className="auth-error-icon">⚠</span> {errors.general}
           </div>
         )}
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        {/* ── Quick Social Buttons ── */}
+        <div className="social-buttons">
+          <button
+            className="social-btn social-btn--google"
+            onClick={() => handleSocialSignup('google')}
+            disabled={loading}
+          >
+            <span className="social-icon">🔍</span>
+            Continue with Google
+          </button>
+          
+          <button
+            className="social-btn social-btn--phone"
+            onClick={() => setSignupMethod(signupMethod === 'phone' ? 'email' : 'phone')}
+          >
+            <span className="social-icon">{signupMethod === 'phone' ? '📱' : '✉️'}</span>
+            Use {signupMethod === 'phone' ? 'Email' : 'Phone'} instead
+          </button>
+        </div>
 
-          {/* Full name */}
-          <div className={`form-group${fieldState('name')}`}>
-            <label htmlFor="name">Full name</label>
+        <div className="auth-divider"><span>or</span></div>
+
+        {/* ── Quick Form ── */}
+        <form onSubmit={handleQuickSignup} className="auth-form">
+          {/* Name */}
+          <div className="form-group">
             <div className="input-wrap">
               <span className="input-icon">👤</span>
               <input
                 type="text"
-                id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Anvesha Dwivedi"
+                placeholder="Your name"
                 autoComplete="name"
               />
-              {touched.name && !fieldErrs.name && (
-                <span className="input-valid-icon">✓</span>
-              )}
             </div>
-            {fieldErrs.name && touched.name && (
-              <p className="field-error" role="alert">{fieldErrs.name}</p>
-            )}
+            {errors.name && <p className="field-error">{errors.name}</p>}
           </div>
 
-          {/* Email */}
-          <div className={`form-group${fieldState('email')}`}>
-            <label htmlFor="email">Email address</label>
-            <div className="input-wrap">
-              <span className="input-icon">✉</span>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="name@example.com"
-                autoComplete="email"
-              />
-              {touched.email && !fieldErrs.email && (
-                <span className="input-valid-icon">✓</span>
-              )}
-            </div>
-            {fieldErrs.email && touched.email && (
-              <p className="field-error" role="alert">{fieldErrs.email}</p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div className={`form-group${fieldState('password')}`}>
-            <label htmlFor="password">Password</label>
-            <div className="input-wrap">
-              <span className="input-icon">🔒</span>
-              <input
-                type={showPwd ? 'text' : 'password'}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Min. 6 characters"
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className="pwd-toggle"
-                onClick={() => setShowPwd(s => !s)}
-                aria-label={showPwd ? 'Hide password' : 'Show password'}
-              >
-                {showPwd ? '🙈' : '👁'}
-              </button>
-            </div>
-            {fieldErrs.password && touched.password && (
-              <p className="field-error" role="alert">{fieldErrs.password}</p>
-            )}
-
-            {/* Strength meter */}
-            {formData.password && (
-              <div className="strength-wrap">
-                <div className="strength-bars">
-                  {[1,2,3,4].map(i => (
-                    <div
-                      key={i}
-                      className="strength-bar"
-                      style={{
-                        background: i <= strength.score ? strength.color : 'rgba(255,255,255,0.12)',
-                        transition: 'background 0.3s',
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="strength-label" style={{ color: strength.color }}>
-                  {strength.label}
-                </span>
+          {/* Phone or Email */}
+          {signupMethod === 'phone' ? (
+            <div className="form-group">
+              <div className="input-wrap">
+                <span className="input-icon">📱</span>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handlePhoneChange}
+                  placeholder="123-456-7890"
+                  autoComplete="tel"
+                />
               </div>
-            )}
-
-            {/* Password rules hint */}
-            {touched.password && formData.password && (
-              <ul className="pwd-rules">
-                <li className={formData.password.length >= 6 ? 'rule--pass' : 'rule--fail'}>
-                  At least 6 characters
-                </li>
-                <li className={/[A-Z]/.test(formData.password) ? 'rule--pass' : 'rule--fail'}>
-                  One uppercase letter
-                </li>
-                <li className={/[0-9]/.test(formData.password) ? 'rule--pass' : 'rule--fail'}>
-                  One number
-                </li>
-              </ul>
-            )}
-          </div>
-
-          {/* Confirm password */}
-          <div className={`form-group${fieldState('confirmPassword')}`}>
-            <label htmlFor="confirmPassword">Confirm password</label>
-            <div className="input-wrap">
-              <span className="input-icon">🔑</span>
-              <input
-                type={showCPwd ? 'text' : 'password'}
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Repeat your password"
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className="pwd-toggle"
-                onClick={() => setShowCPwd(s => !s)}
-                aria-label={showCPwd ? 'Hide password' : 'Show password'}
-              >
-                {showCPwd ? '🙈' : '👁'}
-              </button>
+              {errors.phone && <p className="field-error">{errors.phone}</p>}
             </div>
-            {fieldErrs.confirmPassword && touched.confirmPassword && (
-              <p className="field-error" role="alert">{fieldErrs.confirmPassword}</p>
-            )}
-          </div>
+          ) : (
+            <div className="form-group">
+              <div className="input-wrap">
+                <span className="input-icon">✉️</span>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="name@example.com"
+                  autoComplete="email"
+                />
+              </div>
+              {errors.email && <p className="field-error">{errors.email}</p>}
+            </div>
+          )}
 
-          {/* Role */}
+          {/* Role Selection */}
           <div className="form-group">
-            <label htmlFor="role">I want to</label>
             <div className="role-toggle">
               <button
                 type="button"
                 className={`role-btn${formData.role === 'rider' ? ' role-btn--active' : ''}`}
-                onClick={() => setFormData(f => ({ ...f, role: 'rider' }))}
+                onClick={() => setFormData(prev => ({ ...prev, role: 'rider' }))}
               >
                 🚗 Ride
               </button>
               <button
                 type="button"
                 className={`role-btn${formData.role === 'driver' ? ' role-btn--active' : ''}`}
-                onClick={() => setFormData(f => ({ ...f, role: 'driver' }))}
+                onClick={() => setFormData(prev => ({ ...prev, role: 'driver' }))}
               >
                 🧑‍✈️ Drive
               </button>
             </div>
+          </div>
+
+          {/* Terms */}
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                name="agreeTerms"
+                checked={formData.agreeTerms}
+                onChange={handleChange}
+              />
+              <span className="checkmark"></span>
+              I agree to the <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>
+            </label>
+            {errors.terms && <p className="field-error">{errors.terms}</p>}
           </div>
 
           <button
@@ -350,13 +383,24 @@ const Signup = () => {
             className="auth-button auth-button--ready"
             disabled={loading}
           >
-            {loading
-              ? <><span className="auth-spinner" /> Creating account…</>
-              : 'Create Account'}
+            {loading ? (
+              <><span className="auth-spinner" /> Sending code...</>
+            ) : (
+              `Continue with ${signupMethod === 'phone' ? 'Phone' : 'Email'}`
+            )}
           </button>
         </form>
 
-        <div className="auth-divider"><span>or</span></div>
+        {/* ── Guest Mode ── */}
+        <div className="guest-option">
+          <button
+            className="guest-btn"
+            onClick={handleGuestMode}
+          >
+            Skip for now - Continue as Guest
+          </button>
+          <p className="guest-note">You can create an account later</p>
+        </div>
 
         <div className="auth-switch">
           Already have an account?

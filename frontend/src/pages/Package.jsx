@@ -111,4 +111,55 @@ const Package = () => {
   );
 };
 
-export default Package;
+export default Package;// ── Jaipur ride options with local images/context ──────────────────────────
+export const rideOptions = [
+  {
+    id: 'ride',
+    title: 'UgoX',
+    emoji: '🚗',
+    image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600',
+    desc: 'Comfortable sedans for everyday rides across Jaipur — Amer Fort to Airport.',
+    from: '₹30/km',
+  },
+  {
+    id: 'auto',
+    title: 'UgoAuto',
+    emoji: '🛺',
+    image: 'https://images.unsplash.com/photo-1583743089695-4b816a340f82?auto=format&fit=crop&q=80&w=600',
+    desc: 'Beat the Pink City traffic with quick, affordable auto-rickshaw rides.',
+    from: '₹16/km',
+  },
+  {
+    id: 'bike',
+    title: 'UgoMoto',
+    emoji: '🏍️',
+    image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&q=80&w=600',
+    desc: 'Zip through Johari Bazaar and Old City lanes on a motorbike.',
+    from: '₹12/km',
+  },
+  {
+    id: 'xl',
+    title: 'UgoXL',
+    emoji: '🚙',
+    image: 'https://images.unsplash.com/photo-1533558701576-23c65e0272fb?auto=format&fit=crop&q=80&w=600',
+    desc: 'Spacious SUVs for family trips to Amer Fort or group outings.',
+    from: '₹48/km',
+  },
+  {
+    id: 'black',
+    title: 'UgoBlack',
+    emoji: '🖤',
+    image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=600',
+    desc: 'Luxury sedans for premium travel — perfect for business or special occasions.',
+    from: '₹72/km',
+  },
+  {
+    id: 'reserve',
+    title: 'Reserve',
+    emoji: '📅',
+    image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=600',
+    desc: 'Book your ride to Jaipur Airport or railway station up to 90 days in advance.',
+    from: 'Schedule ahead',
+  },
+];
+

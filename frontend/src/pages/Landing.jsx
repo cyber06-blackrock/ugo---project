@@ -1,60 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation, ShieldCheck, Star, Clock, MapPin } from 'lucide-react';
 import { getNearbyPlaces, QUICK_SPOTS, JAIPUR_CENTER } from '../utils/jaipur';
 import './Landing.css';
-
-// ── Jaipur ride options with local images/context ──────────────────────────
-const rideOptions = [
-  {
-    id: 'ride',
-    title: 'UgoX',
-    emoji: '🚗',
-    image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600',
-    desc: 'Comfortable sedans for everyday rides across Jaipur — Amer Fort to Airport.',
-    from: '₹30/km',
-  },
-  {
-    id: 'auto',
-    title: 'UgoAuto',
-    emoji: '🛺',
-    image: 'https://images.unsplash.com/photo-1606802057180-00c5c8da6662?auto=format&fit=crop&q=80&w=600',
-    desc: 'Beat the Pink City traffic with quick, affordable auto-rickshaw rides.',
-    from: '₹16/km',
-  },
-  {
-    id: 'bike',
-    title: 'UgoMoto',
-    emoji: '🏍️',
-    image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&q=80&w=600',
-    desc: 'Zip through Johari Bazaar and Old City lanes on a motorbike.',
-    from: '₹12/km',
-  },
-  {
-    id: 'xl',
-    title: 'UgoXL',
-    emoji: '🚙',
-    image: 'https://images.unsplash.com/photo-1533558701576-23c65e0272fb?auto=format&fit=crop&q=80&w=600',
-    desc: 'Spacious SUVs for family trips to Amer Fort or group outings.',
-    from: '₹48/km',
-  },
-  {
-    id: 'black',
-    title: 'UgoBlack',
-    emoji: '🖤',
-    image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=600',
-    desc: 'Luxury sedans for premium travel — perfect for business or special occasions.',
-    from: '₹72/km',
-  },
-  {
-    id: 'reserve',
-    title: 'Reserve',
-    emoji: '📅',
-    image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=600',
-    desc: 'Book your ride to Jaipur Airport or railway station up to 90 days in advance.',
-    from: 'Schedule ahead',
-  },
-];
+import { rideOptions } from './Package';
 
 // ── Jaipur landmark highlights ─────────────────────────────────────────────
 const CITY_HIGHLIGHTS = [
@@ -79,209 +28,185 @@ const Landing = () => {
   const [dropoffSugg,  setDropoffSugg]  = useState([]);
   const [pickupFocus,  setPickupFocus]  = useState(false);
   const [dropoffFocus, setDropoffFocus] = useState(false);
+
   const [selectedOption, setSelectedOption] = useState(null);
 
-  const pickupRef  = useRef(null);
-  const dropoffRef = useRef(null);
+  const pickupTimeout  = useRef(null);
+  const dropoffTimeout = useRef(null);
 
-  // ── Grab user GPS on mount ──────────────────────────────────────────
+  // ── GPS location handler ─────────────────────────────────────────────────
   useEffect(() => {
-    const cached = sessionStorage.getItem('ugo_location');
-    if (cached) {
-      try {
-        const { lat, lng } = JSON.parse(cached);
-        if (lat && lng) { setUserLat(lat); setUserLng(lng); }
-      } catch { /* ignore */ }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLat(pos.coords.latitude);
+          setUserLng(pos.coords.longitude);
+        },
+        () => {
+          console.log('Location access denied; using Jaipur center');
+        }
+      );
     }
   }, []);
 
-  // ── Nearby suggestion search ────────────────────────────────────────
-  const getSuggestions = (query) =>
-    getNearbyPlaces(query, userLat, userLng, 7);
+  // ── Autocomplete with Jaipur bias ──────────────────────────────────────────
+  const fetchSuggestions = async (query, type) => {
+    if (!query || query.length < 2) {
+      const nearby = getNearbyPlaces(query, userLat, userLng, 6);
+      const names  = nearby.map(p => `${p.name}, Jaipur`);
+      if (type === 'pickup') setPickupSugg(names);
+      else setDropoffSugg(names);
+      return;
+    }
 
-  const handlePickupChange = (e) => {
+    const local = getNearbyPlaces(query, userLat, userLng, 5);
+    const localNames = local.map(p => `${p.name}, Jaipur`);
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Jaipur, Rajasthan')}&limit=4&viewbox=75.65,27.10,76.00,26.75&bounded=1`
+      );
+      const data = await res.json();
+      const remote = data.map(item => item.display_name).filter(
+        n => !localNames.some(ln => n.toLowerCase().includes(ln.split(',')[0].toLowerCase()))
+      );
+      const merged = [...localNames, ...remote].slice(0, 7);
+      if (type === 'pickup') setPickupSugg(merged);
+      else setDropoffSugg(merged);
+    } catch {
+      if (type === 'pickup') setPickupSugg(localNames);
+      else setDropoffSugg(localNames);
+    }
+  };
+
+  const onPickupChange = (e) => {
     const val = e.target.value;
     setPickup(val);
-    setPickupSugg(getSuggestions(val));
+    if (pickupTimeout.current) clearTimeout(pickupTimeout.current);
+    pickupTimeout.current = setTimeout(() => fetchSuggestions(val, 'pickup'), 500);
   };
 
-  const handleDropoffChange = (e) => {
+  const onDropoffChange = (e) => {
     const val = e.target.value;
     setDropoff(val);
-    setDropoffSugg(getSuggestions(val));
+    if (dropoffTimeout.current) clearTimeout(dropoffTimeout.current);
+    dropoffTimeout.current = setTimeout(() => fetchSuggestions(val, 'dropoff'), 500);
   };
 
-  const handlePickupFocus = () => {
-    setPickupFocus(true);
-    setPickupSugg(getSuggestions(pickup));
-  };
-
-  const handleDropoffFocus = () => {
-    setDropoffFocus(true);
-    setDropoffSugg(getSuggestions(dropoff));
-  };
-
-  const selectPickup = (name) => {
-    setPickup(name);
-    setPickupFocus(false);
-    setPickupSugg([]);
-    dropoffRef.current?.focus();
-  };
-
-  const selectDropoff = (name) => {
-    setDropoff(name);
-    setDropoffFocus(false);
-    setDropoffSugg([]);
-  };
-
-  const handleSearch = (e) => {
+  const handleRequestRide = (e) => {
     e.preventDefault();
-    if (pickup && dropoff) navigate('/ride', { state: { pickup, dropoff } });
+    if (pickup && dropoff) {
+      navigate('/request-ride', { state: { pickup, dropoff } });
+    }
   };
 
-  // ── Close dropdowns on outside click ───────────────────────────────
-  useEffect(() => {
-    const handler = (e) => {
-      if (!pickupRef.current?.contains(e.target))   setPickupFocus(false);
-      if (!dropoffRef.current?.contains(e.target))  setDropoffFocus(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
+  const handleOptionClick = (opt) => {
+    setSelectedOption(opt);
+    if (opt.id === 'reserve') {
+      navigate('/reserve');
+    } else {
+      navigate('/request-ride', { state: { vehicleType: opt.id } });
+    }
+  };
 
   return (
-    <div className="landing-page animate-in">
-
+    <div className="landing-container">
       {/* ── Hero ── */}
-      <section className="hero-section">
+      <section className="hero">
         <div className="hero-content">
-          <div className="booking-widget">
+          <div className="hero-text">
+            <h1>Request a ride now</h1>
+            <div className="booking-widget">
+              <form onSubmit={handleRequestRide}>
+                <div className="input-row">
+                  <div className="input-wrapper">
+                    <span className="input-icon">📍</span>
+                    <input
+                      type="text"
+                      placeholder="Pickup location"
+                      value={pickup}
+                      onChange={onPickupChange}
+                      onFocus={() => setPickupFocus(true)}
+                      onBlur={() => setTimeout(() => setPickupFocus(false), 200)}
+                    />
+                    {pickupFocus && pickupSugg.length > 0 && (
+                      <div className="suggestions">
+                        {pickupSugg.map((sugg, i) => (
+                          <div
+                            key={i}
+                            className="suggestion"
+                            onClick={() => { setPickup(sugg); setPickupFocus(false); }}
+                          >
+                            {sugg}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button type="button" className="locate-btn" title="Use current location">
+                    <Navigation size={16} />
+                  </button>
+                </div>
 
-            {/* Jaipur city badge */}
-            <div className="city-badge">
-              <MapPin size={14} /> Jaipur, Rajasthan
+                <div className="input-row">
+                  <div className="input-wrapper">
+                    <span className="input-icon">🏁</span>
+                    <input
+                      type="text"
+                      placeholder="Dropoff destination"
+                      value={dropoff}
+                      onChange={onDropoffChange}
+                      onFocus={() => setDropoffFocus(true)}
+                      onBlur={() => setTimeout(() => setDropoffFocus(false), 200)}
+                    />
+                    {dropoffFocus && dropoffSugg.length > 0 && (
+                      <div className="suggestions">
+                        {dropoffSugg.map((sugg, i) => (
+                          <div
+                            key={i}
+                            className="suggestion"
+                            onClick={() => { setDropoff(sugg); setDropoffFocus(false); }}
+                          >
+                            {sugg}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button type="submit" className="request-btn">See prices</button>
+              </form>
+
+              <div className="schedule-link">
+                <button onClick={() => navigate('/reserve')}>
+                  <Clock size={16} />
+                  Schedule for later
+                </button>
+              </div>
             </div>
-
-            <h1>Your ride in the<br />Pink City 🌸</h1>
-            <p>From Hawa Mahal to the Airport — Ugo gets you there.</p>
-
-            <form onSubmit={handleSearch} autoComplete="off">
-
-              {/* Pickup */}
-              <div className="lnd-input-block" ref={pickupRef}>
-                <div className="lnd-input-wrap">
-                  <span className="dot" />
-                  <input
-                    type="text"
-                    placeholder="Pickup — e.g. Hawa Mahal"
-                    value={pickup}
-                    onChange={handlePickupChange}
-                    onFocus={handlePickupFocus}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="locate-btn"
-                    title="Use current location"
-                    onClick={() => setPickup('My Location')}
-                  >
-                    <Navigation size={15} />
-                  </button>
-                </div>
-                {pickupFocus && pickupSugg.length > 0 && (
-                  <ul className="lnd-sugg-list">
-                    {pickupSugg.map((p) => (
-                      <li key={p.name} onMouseDown={() => selectPickup(p.name)}>
-                        <span className="lnd-sugg-icon">{p.icon}</span>
-                        <span className="lnd-sugg-name">{p.name}</span>
-                        <span className="lnd-sugg-area">{p.area}</span>
-                        {p.dist != null && (
-                          <span className="lnd-sugg-dist">{p.dist.toFixed(1)} km</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Dropoff */}
-              <div className="lnd-input-block" ref={dropoffRef}>
-                <div className="lnd-input-wrap">
-                  <span className="square" />
-                  <input
-                    ref={dropoffRef}
-                    type="text"
-                    placeholder="Destination — e.g. Amer Fort"
-                    value={dropoff}
-                    onChange={handleDropoffChange}
-                    onFocus={handleDropoffFocus}
-                    required
-                  />
-                </div>
-                {dropoffFocus && dropoffSugg.length > 0 && (
-                  <ul className="lnd-sugg-list">
-                    {dropoffSugg.map((p) => (
-                      <li key={p.name} onMouseDown={() => selectDropoff(p.name)}>
-                        <span className="lnd-sugg-icon">{p.icon}</span>
-                        <span className="lnd-sugg-name">{p.name}</span>
-                        <span className="lnd-sugg-area">{p.area}</span>
-                        {p.dist != null && (
-                          <span className="lnd-sugg-dist">{p.dist.toFixed(1)} km</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Quick-spot chips */}
-              <div className="lnd-chips">
-                {QUICK_SPOTS.slice(0, 4).map((s) => (
-                  <button
-                    key={s.name}
-                    type="button"
-                    className="lnd-chip"
-                    onClick={() => setDropoff(s.name)}
-                  >
-                    {s.icon} {s.name}
-                  </button>
-                ))}
-              </div>
-
-              <button type="submit" className="btn-primary full-width">
-                See prices
-              </button>
-            </form>
           </div>
-        </div>
 
-        {/* Hero image — Jaipur skyline */}
-        <div
-          className="hero-image"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&q=80&w=1400')" }}
-        >
-          <div className="hero-image-overlay">
-            <div className="hero-highlights">
-              {CITY_HIGHLIGHTS.map((h) => (
-                <div key={h.name} className="hero-highlight-chip">
-                  {h.icon} {h.name}
+          <div className="hero-landmarks">
+            <h3>Popular in Jaipur</h3>
+            <div className="landmarks-grid">
+              {CITY_HIGHLIGHTS.map((place, i) => (
+                <div
+                  key={i}
+                  className="landmark"
+                  onClick={() => setDropoff(`${place.name}, Jaipur`)}
+                >
+                  <span className="landmark-icon">{place.icon}</span>
+                  <div className="landmark-info">
+                    <div className="landmark-name">{place.name}</div>
+                    <div className="landmark-area">{place.area}</div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </section>
-
-      {/* ── Stats bar ── */}
-      <div className="stats-bar">
-        <div className="stat-item"><Star size={16} fill="#f59e0b" color="#f59e0b" /> <strong>4.8</strong> avg rating</div>
-        <div className="stat-divider" />
-        <div className="stat-item"><Clock size={16} /> <strong>&lt;4 min</strong> avg pickup</div>
-        <div className="stat-divider" />
-        <div className="stat-item"><MapPin size={16} /> <strong>500+</strong> drivers in Jaipur</div>
-        <div className="stat-divider" />
-        <div className="stat-item">🌸 <strong>Pink City</strong> coverage</div>
-      </div>
 
       {/* ── Ways to ride ── */}
       <section className="ways-to-ride">
@@ -298,7 +223,7 @@ const Landing = () => {
                     onError={(e) => {
                       // Fallback image for auto-rickshaw if main image fails to load
                       if (opt.id === 'auto') {
-                        e.target.src = 'https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?auto=format&fit=crop&q=80&w=600';
+                        e.target.src = 'https://images.unsplash.com/photo-1609695001873-3297510ef4c3?auto=format&fit=crop&q=80&w=600';
                       }
                       // Fallback image for bike if main image fails to load
                       if (opt.id === 'bike') {
@@ -366,28 +291,28 @@ const Landing = () => {
               <div className="step-icon">📍</div>
               <div className="step-text">
                 <h3>1. Enter your destination</h3>
-                <p>Type any Jaipur landmark — Hawa Mahal, Amer Fort, MI Road — and get instant prices.</p>
+                <p>Open the app and enter where you want to go.</p>
               </div>
             </div>
             <div className="step">
               <div className="step-icon">🚗</div>
               <div className="step-text">
-                <h3>2. Pick your ride</h3>
-                <p>Choose from UgoX, Auto, Moto, or Black. Fares start at ₹12/km.</p>
+                <h3>2. Meet your driver</h3>
+                <p>You'll see your driver's picture and vehicle details, and can track their arrival.</p>
               </div>
             </div>
             <div className="step">
-              <div className="step-icon">📲</div>
+              <div className="step-icon">🏁</div>
               <div className="step-text">
-                <h3>3. Track in real time</h3>
-                <p>Watch your driver navigate Jaipur's streets live on the map.</p>
+                <h3>3. Check the route</h3>
+                <p>Always check that your trip route matches where you want to go.</p>
               </div>
             </div>
             <div className="step">
-              <div className="step-icon"><ShieldCheck size={28} /></div>
+              <div className="step-icon">⭐</div>
               <div className="step-text">
-                <h3>4. Arrive safely</h3>
-                <p>All drivers are verified, rated, and local to Jaipur. Rate your trip to keep standards high.</p>
+                <h3>4. Enjoy the ride</h3>
+                <p>Sit back and relax. Your driver knows the best routes in Jaipur.</p>
               </div>
             </div>
           </div>
@@ -396,81 +321,75 @@ const Landing = () => {
 
       {/* ── City promo ── */}
       <section className="more-info">
-        <div className="container split">
-          <div className="text-content">
-            <div className="promo-tag">🌸 Built for Jaipur</div>
-            <h2>Explore the Pink City, your way</h2>
-            <p>
-              From the winding lanes of the Old City to the wide boulevards of Vaishali Nagar —
-              Ugo covers all of Jaipur. Whether you're visiting Amer Fort at sunrise or catching
-              a late flight from Sanganer Airport, we've got a ride waiting.
-            </p>
-            <div className="promo-chips">
-              <span>🏯 Heritage tours</span>
-              <span>✈️ Airport transfers</span>
-              <span>🛍️ Market runs</span>
-              <span>🎓 College routes</span>
+        <div className="container">
+          <div className="split">
+            <div className="text-content">
+              <div className="promo-tag">Jaipur's Pink City</div>
+              <h2>Your reliable ride, anytime in Jaipur</h2>
+              <p>
+                Whether you're exploring the historic forts, shopping in Johari Bazaar, or heading to the airport, 
+                Ugo connects you with reliable rides across the Pink City.
+              </p>
+              <div className="promo-chips">
+                <span><ShieldCheck size={14} /> Safe</span>
+                <span><Star size={14} /> Reliable</span>
+                <span><Clock size={14} /> Quick</span>
+              </div>
+              <button className="btn-secondary" onClick={() => navigate('/signup')}>
+                Sign up
+              </button>
             </div>
-            <button className="btn-secondary" onClick={() => navigate('/ride')}>
-              Book a ride now
-            </button>
+            <div
+              className="image-content"
+              style={{
+                backgroundImage: "url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&q=80&w=800')"
+              }}
+            />
           </div>
-          <div
-            className="image-content"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&q=80&w=800')" }}
-          />
         </div>
       </section>
 
       {/* ── Drive CTA ── */}
       <section className="drive-cta">
         <div className="container">
-          <h2>Drive in Jaipur with Ugo</h2>
-          <p>Join 500+ Jaipur drivers already earning with Ugo. Set your own hours, drive your own car.</p>
+          <h2>Make money driving</h2>
+          <p>
+            Set your own hours. Earn on your own terms. 
+            Sign up to drive with Ugo in Jaipur today.
+          </p>
           <div className="drive-cta-actions">
-            <button className="btn-primary" onClick={() => navigate('/driver-onboarding')}>
-              Become a driver
+            <button className="btn-primary" onClick={() => navigate('/driver-signup')}>
+              Start earning
             </button>
-            <button className="btn-ghost" onClick={() => navigate('/login', { state: { role: 'driver' } })}>
-              Already a driver? Sign in
+            <button className="btn-secondary" onClick={() => navigate('/learn-more')}>
+              Learn more
             </button>
           </div>
         </div>
       </section>
 
-      {/* ── Ride booking modal ── */}
+      {/* ── Option detail modal ── */}
       {selectedOption && (
         <div className="modal-overlay" onClick={() => setSelectedOption(null)}>
-          <div className="modal-content animate-in" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedOption(null)}>✕</button>
-            <div className="modal-header">
-              <img src={selectedOption.image} alt={selectedOption.title} className="modal-img" />
-              <div className="modal-header-text">
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedOption(null)}>
+              ✕
+            </button>
+            <img src={selectedOption.image} alt={selectedOption.title} />
+            <div className="modal-body">
+              <div className="modal-title">
                 <span className="modal-emoji">{selectedOption.emoji}</span>
                 <h3>{selectedOption.title}</h3>
-                <span className="modal-from">{selectedOption.from}</span>
               </div>
-            </div>
-            <form
-              className="modal-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.target);
-                navigate('/ride', { state: { pickup: fd.get('pickup'), dropoff: fd.get('dropoff') } });
-              }}
-            >
-              <div className="input-group">
-                <label>Pickup in Jaipur</label>
-                <input name="pickup" type="text" placeholder="e.g. Hawa Mahal, C-Scheme" required />
-              </div>
-              <div className="input-group">
-                <label>Destination in Jaipur</label>
-                <input name="dropoff" type="text" placeholder="e.g. Amer Fort, Jaipur Airport" required />
-              </div>
-              <button type="submit" className="btn-primary full-width modal-submit">
-                See prices →
+              <p>{selectedOption.desc}</p>
+              <div className="modal-price">Starting at {selectedOption.from}</div>
+              <button
+                className="modal-cta"
+                onClick={() => handleOptionClick(selectedOption)}
+              >
+                {selectedOption.id === 'reserve' ? 'Schedule ride' : 'Request now'}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}

@@ -419,3 +419,192 @@
   }
   .auth-title { font-size: 1.9rem; }
 }
+
+/* ── Fast Signup Extensions ──────────────────────────────────────────────── */
+
+/* Social buttons */
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.social-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+.social-btn--google {
+  border-color: rgba(66,133,244,0.3);
+  background: rgba(66,133,244,0.1);
+}
+
+.social-btn--google:hover {
+  background: rgba(66,133,244,0.15);
+  border-color: rgba(66,133,244,0.5);
+}
+
+.social-btn--phone {
+  border-color: rgba(34,197,94,0.3);
+  background: rgba(34,197,94,0.1);
+}
+
+.social-btn--phone:hover {
+  background: rgba(34,197,94,0.15);
+  border-color: rgba(34,197,94,0.5);
+}
+
+.social-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Secondary button */
+.auth-button--secondary {
+  background: rgba(255,255,255,0.08);
+  color: #bbb;
+  margin-top: 1rem;
+}
+
+.auth-button--secondary:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+/* Checkbox styling */
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #aaa;
+  line-height: 1.4;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  background: rgba(0,0,0,0.3);
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s;
+  margin-top: 1px;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.checkbox-label a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.checkbox-label a:hover {
+  text-decoration: underline;
+}
+
+/* Guest mode */
+.guest-option {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.guest-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+
+.guest-btn:hover {
+  color: #bbb;
+}
+
+.guest-note {
+  font-size: 0.75rem;
+  color: #666;
+  margin: 0.3rem 0 0;
+}
+
+/* Success spinner */
+.success-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: authSpin 1s linear infinite;
+  margin: 1rem auto 0;
+}
+
+/* OTP specific styles */
+.auth-card input[style*="text-align: center"] {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+/* Mobile responsiveness for fast signup */
+@media (max-width: 480px) {
+  .social-buttons {
+    gap: 0.6rem;
+  }
+  
+  .social-btn {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .checkbox-label {
+    font-size: 0.8rem;
+  }
+  
+  .guest-option {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+  }
+}

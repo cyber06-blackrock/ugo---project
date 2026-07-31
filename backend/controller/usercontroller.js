@@ -1,100 +1,100 @@
 const User = require('../Models/user');
-const jwt = require('jsonwebtoken');
+const jwt  = require('jsonwebtoken');
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret', {
-    expiresIn: '30d',
-  });
-};
+// ── Helpers ────────────────────────────────────────────────────────────────
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '30d' });
 
-// ── Validation helpers ────────────────────────────────────────────────────────
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const isValidPhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));
 
-// @desc    Register a new user
-// @route   POST /api/users/register
-// @access  Public
+// ── @route   POST /api/users/register ──────────────────────────────────────
+// Supports two modes:
+//   1. Quick signup  → name + phone  (OTP-verified, no password)
+//   2. Email signup  → name + email + password
 const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, phone, password, role, quickSignup } = req.body;
 
-  // ── Field presence ──
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'Name, email and password are required.' });
+  // ── Name required always ──
+  if (!name || !name.trim()) {
+    return res.status(400).json({ message: 'Name is required.' });
   }
-
-  // ── Name ──
   const trimmedName = name.trim();
-  if (trimmedName.length < 2) {
-    return res.status(400).json({ message: 'Name must be at least 2 characters.' });
-  }
-  if (trimmedName.length > 50) {
-    return res.status(400).json({ message: 'Name must be 50 characters or fewer.' });
+  if (trimmedName.length < 2)  return res.status(400).json({ message: 'Name must be at least 2 characters.' });
+  if (trimmedName.length > 50) return res.status(400).json({ message: 'Name must be 50 characters or fewer.' });
+
+  // ── At least email OR phone must be provided ──
+  if (!email && !phone) {
+    return res.status(400).json({ message: 'Email or phone number is required.' });
   }
 
-  // ── Email ──
-  if (!isValidEmail(email.trim())) {
+  // ── Validate email if provided ──
+  if (email && !isValidEmail(email.trim())) {
     return res.status(400).json({ message: 'Please enter a valid email address.' });
   }
 
-  // ── Password ──
-  if (password.length < 6) {
-    return res.status(400).json({ message: 'Password must be at least 6 characters.' });
-  }
-  if (password.length > 100) {
-    return res.status(400).json({ message: 'Password is too long.' });
+  // ── Validate phone if provided ──
+  if (phone && !isValidPhone(phone)) {
+    return res.status(400).json({ message: 'Please enter a valid 10-digit phone number.' });
   }
 
-  // ── Role ──
-  const allowedRoles = ['rider', 'driver'];
-  const userRole = role && allowedRoles.includes(role) ? role : 'rider';
+  // ── Password required for email signup (not quickSignup) ──
+  if (!quickSignup && email) {
+    if (!password)          return res.status(400).json({ message: 'Password is required.' });
+    if (password.length < 6)  return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+    if (password.length > 100) return res.status(400).json({ message: 'Password is too long.' });
+  }
+
+  const userRole = ['rider', 'driver'].includes(role) ? role : 'rider';
 
   try {
-    const userExists = await User.findOne({ email: email.trim().toLowerCase() });
-    if (userExists) {
-      return res.status(400).json({ message: 'An account with this email already exists.' });
+    // ── Duplicate check ──
+    if (email) {
+      const exists = await User.findOne({ email: email.trim().toLowerCase() });
+      if (exists) return res.status(400).json({ message: 'An account with this email already exists.' });
+    }
+    if (phone) {
+      const cleaned = phone.replace(/\D/g, '');
+      const exists  = await User.findOne({ phone: cleaned });
+      if (exists) return res.status(400).json({ message: 'An account with this phone number already exists.' });
     }
 
-    const user = await User.create({
+    // ── Create user ──
+    const userData = {
       name: trimmedName,
-      email: email.trim().toLowerCase(),
-      password,
       role: userRole,
+    };
+    if (email)    userData.email    = email.trim().toLowerCase();
+    if (phone)    userData.phone    = phone.replace(/\D/g, '');
+    if (password) userData.password = password;   // hashed by pre-save hook
+
+    const user = await User.create(userData);
+
+    res.status(201).json({
+      _id:   user._id,
+      name:  user.name,
+      email: user.email  || null,
+      phone: user.phone  || null,
+      role:  user.role,
+      token: generateToken(user._id),
     });
 
-    if (user) {
-      res.status(201).json({
-        _id:   user._id,
-        name:  user.name,
-        email: user.email,
-        role:  user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid user data.' });
-    }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Register error:', error.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
   }
 };
 
-// @desc    Auth user & get token
-// @route   POST /api/users/login
-// @access  Public
+// ── @route   POST /api/users/login ─────────────────────────────────────────
+// Supports email+password login
 const authUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // ── Field presence ──
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required.' });
   }
-
-  // ── Email format ──
   if (!isValidEmail(email.trim())) {
     return res.status(400).json({ message: 'Please enter a valid email address.' });
-  }
-
-  // ── Password length sanity ──
-  if (password.length < 6) {
-    return res.status(400).json({ message: 'Password must be at least 6 characters.' });
   }
 
   try {
@@ -105,6 +105,7 @@ const authUser = async (req, res) => {
         _id:   user._id,
         name:  user.name,
         email: user.email,
+        phone: user.phone || null,
         role:  user.role,
         token: generateToken(user._id),
       });
@@ -112,8 +113,20 @@ const authUser = async (req, res) => {
       res.status(401).json({ message: 'Invalid email or password.' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Login error:', error.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
   }
 };
 
-module.exports = { registerUser, authUser };
+// ── @route   GET /api/users/profile ────────────────────────────────────────
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+module.exports = { registerUser, authUser, getUserProfile };
