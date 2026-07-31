@@ -423,3 +423,76 @@
     margin: 1.5rem 1rem;
   }
 }
+
+/* ── Jaipur additions ── */
+.biz-city-tag {
+  display: inline-block;
+  background: #fff0f3;
+  border: 1px solid #f8bbd9;
+  color: #c2185b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+.biz-hero-overlay {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.biz-hero-overlay span {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+.biz-usecases {
+  background: #f7f7f7;
+  padding: 5rem 5%;
+}
+
+.biz-usecases-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.biz-usecases-inner h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.biz-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.biz-case-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  border: 1.5px solid rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.biz-case-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.biz-case-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+.biz-case-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.biz-case-card p  { font-size: 0.85rem; color: #666; line-height: 1.5; margin: 0; }

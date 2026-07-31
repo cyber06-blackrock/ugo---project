@@ -172,7 +172,7 @@
 }
 
 .rules-image {
-  background: url('https://images.unsplash.com/photo-1620455866160-c3d528cd0214?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+  background: url('https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
   min-height: 500px;
 }
 
@@ -292,4 +292,85 @@
   .step-card {
     padding: 2rem 1.5rem;
   }
+}
+
+/* ── Jaipur additions ── */
+.pkg-city-tag {
+  display: inline-block;
+  background: #fff0f3;
+  border: 1px solid #f8bbd9;
+  color: #c2185b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+.pkg-trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.pkg-trust-strip span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Popular delivery routes */
+.pkg-routes {
+  background: #000;
+  color: #fff;
+  padding: 5rem 5%;
+}
+
+.pkg-routes-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pkg-routes-inner h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.pkg-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.pkg-route-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+}
+
+.pkg-route-card:hover { background: rgba(255,255,255,0.1); }
+
+.pkg-route-from { font-weight: 600; }
+.pkg-route-arrow { color: #888; }
+.pkg-route-to   { font-weight: 600; flex: 1; }
+.pkg-route-time {
+  font-size: 0.75rem;
+  color: #c2185b;
+  background: rgba(194,24,91,0.15);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
 }

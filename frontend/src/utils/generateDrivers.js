@@ -53,17 +53,20 @@ export const generateNearbyDrivers = (lat, lng, count = 12) => {
     // Ensure the first few drivers are specifically 1, 2, 3 mins away and SEPARATED by direction
     let radiusKm;
     let customAngle = angle;
-    if (i === 0) { 
-        radiusKm = 0.45; // ~1 min
-        customAngle = 0; // East
-    } else if (i === 1) { 
-        radiusKm = 0.95; // ~2 min
-        customAngle = Math.PI * 0.75; // North-West
-    } else if (i === 2) { 
-        radiusKm = 1.45; // ~3 min
-        customAngle = Math.PI * 1.5; // South
+    if (i === 0) {
+        radiusKm = 0.45;           // ~1 min — East
+        customAngle = 0;
+    } else if (i === 1) {
+        radiusKm = 0.95;           // ~2 min — North-West
+        customAngle = Math.PI * 0.75;
+    } else if (i === 2) {
+        radiusKm = 1.45;           // ~3 min — South
+        customAngle = Math.PI * 1.5;
+    } else if (i === 3) {
+        radiusKm = 1.80;           // ~4 min — North-East
+        customAngle = Math.PI * 0.25;
     } else {
-        radiusKm = 2.0 + seededRandom() * 4.0; 
+        radiusKm = 2.0 + seededRandom() * 4.0;
     }
     
     // ~0.009 degrees ≈ 1 km

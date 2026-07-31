@@ -1,107 +1,118 @@
 import React, { useEffect } from 'react';
-import './About.css';
 import { Link } from 'react-router-dom';
+import './About.css';
 
 const About = () => {
-  // Simple scroll effect to reset on page load
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
     <div className="about-page">
-      {/* Hero Section */}
+
+      {/* ── Hero ── */}
       <section className="about-hero">
         <div className="about-hero-content">
-          <h1 className="about-hero-title">About us</h1>
+          <div className="about-city-tag">🌸 Jaipur, Rajasthan</div>
+          <h1 className="about-hero-title">Moving the Pink City forward</h1>
           <p className="about-hero-subtitle">
-            We reimagine the way the world moves for the better.
+            Ugo is Jaipur's own ride platform — built for the streets of the Old City, the highways to Amer, and everywhere in between.
           </p>
         </div>
       </section>
 
-      {/* Vision Statement */}
+      {/* ── Vision ── */}
       <section className="about-vision">
-        <h2>We ignite opportunity by setting the world in motion.</h2>
+        <h2>We started in Jaipur. We're staying in Jaipur.</h2>
         <p>
-          Good things happen when people can move, whether across town or toward their dreams. 
-          Opportunities appear, open up, become reality. What started as a way to tap a button to get a ride 
-          has led to billions of moments of human connection as people around the world go all kinds of places 
-          in all kinds of ways with the help of our technology.
+          Every great city deserves a ride platform that truly knows it. Ugo was built by people who live in Jaipur,
+          for the 40 lakh residents who navigate its markets, monuments, and mohallas every single day.
+          From the walled lanes of the Old City to the new tech corridors of Malviya Nagar — we make every
+          journey feel local.
         </p>
       </section>
 
-      {/* Values Grid */}
+      {/* ── Values ── */}
       <section className="about-values">
         <div className="about-values-container">
-          <h2 className="about-values-header">Our core values</h2>
+          <h2 className="about-values-header">What drives us</h2>
           <div className="values-grid">
             <div className="value-card">
-              <div className="value-icon">❤️</div>
-              <h3>Build with heart</h3>
-              <p>We care deeply about our work and the people who depend on it. That's why we obsess over the details and build with care.</p>
+              <div className="value-icon">🏯</div>
+              <h3>Rooted in Jaipur</h3>
+              <p>We know the difference between Amer Road and Ajmer Road. Our drivers are locals who know every shortcut, festival detour, and traffic hotspot.</p>
             </div>
             <div className="value-card">
               <div className="value-icon">🤝</div>
-              <h3>Do the right thing</h3>
-              <p>Period. We hold ourselves to the highest standard, even when no one is looking. Integrity is everything.</p>
+              <h3>Fair to everyone</h3>
+              <p>Transparent fares starting at ₹12/km. No surge pricing on festival days. No hidden charges. What you see is what you pay.</p>
             </div>
             <div className="value-card">
               <div className="value-icon">🛡️</div>
-              <h3>Stand for safety</h3>
-              <p>Physical and digital safety are at the core of everything we do. It's a non-negotiable reality of moving people.</p>
+              <h3>Safety first</h3>
+              <p>Every driver is verified, every ride is tracked. Share your trip live with family — because in Jaipur, we look out for each other.</p>
             </div>
             <div className="value-card">
-              <div className="value-icon">🌍</div>
-              <h3>See the forest & the trees</h3>
-              <p>We think big but never lose sight of the small things that matter. We understand the interconnectedness of our platform.</p>
+              <div className="value-icon">⚡</div>
+              <h3>Fast & reliable</h3>
+              <p>Average pickup under 4 minutes anywhere in the city. From C-Scheme to Vaishali Nagar — a driver is always nearby.</p>
             </div>
             <div className="value-card">
-              <div className="value-icon">💡</div>
-              <h3>Great minds don't think alike</h3>
-              <p>We embrace diversity and celebrate the unique perspectives that make us better. We champion inclusive innovation.</p>
+              <div className="value-icon">🌱</div>
+              <h3>Greener Jaipur</h3>
+              <p>We're actively adding CNG autos and EVs to cut emissions in the Pink City. Cleaner rides, cleaner air, cleaner heritage.</p>
             </div>
             <div className="value-card">
-              <div className="value-icon">📈</div>
-              <h3>Make big bold bets</h3>
-              <p>We take risks and swing for the fences. Innovation requires pushing boundaries and embracing the unknown.</p>
+              <div className="value-icon">💼</div>
+              <h3>Driver livelihoods</h3>
+              <p>500+ Jaipur drivers earn their living with Ugo. Flexible hours, fair pay, and a community that has their back.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Global Stats */}
+      {/* ── Jaipur stats ── */}
       <section className="about-stats">
         <div className="stats-grid">
           <div className="stat-item">
-            <span className="stat-number">10k+</span>
-            <span className="stat-label">Cities world wide</span>
+            <span className="stat-number">500+</span>
+            <span className="stat-label">Active drivers in Jaipur</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number">30B+</span>
-            <span className="stat-label">Trips completed</span>
+            <span className="stat-number">50k+</span>
+            <span className="stat-label">Rides completed in the Pink City</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number">130M+</span>
-            <span className="stat-label">Monthly active platform consumers</span>
+            <span className="stat-number">&lt;4 min</span>
+            <span className="stat-label">Average pickup time</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number">6M+</span>
-            <span className="stat-label">Active drivers and couriers</span>
+            <span className="stat-number">4.8 ★</span>
+            <span className="stat-label">Average driver rating</span>
           </div>
         </div>
       </section>
 
-      {/* Sustainability Section */}
+      {/* ── Coverage ── */}
       <section className="about-sustainability">
-        <div className="sustainability-image"></div>
+        <div className="sustainability-image" />
         <div className="sustainability-content">
-          <h2>Sustainability</h2>
+          <div className="about-city-tag" style={{ marginBottom: '1rem' }}>📍 City coverage</div>
+          <h2>All of Jaipur, covered</h2>
           <p>
-            We're building a sustainable platform for the future. Our goal is to become a fully zero-emission 
-            platform by 2040, with 100% of rides taking place in zero-emission vehicles, on public transit, or with micro-mobility.
+            From the airport in Sanganer to the forts of Amer — from Vaishali Nagar in the west
+            to Raja Park in the east. Ugo covers every pin code in Jaipur, including Sanganer, Bagru,
+            Vidhyadhar Nagar, and Malviya Nagar.
           </p>
-          <Link to="/sustainability" className="sustainability-button">Learn about our goals</Link>
+          <div className="about-coverage-chips">
+            <span>🏯 Old City</span>
+            <span>✈️ Sanganer Airport</span>
+            <span>🏰 Amer</span>
+            <span>🛍️ MI Road</span>
+            <span>🎓 MNIT / University</span>
+            <span>🏥 SMS Hospital</span>
+            <span>🏬 World Trade Park</span>
+            <span>🌸 Jawahar Circle</span>
+          </div>
+          <Link to="/ride" className="sustainability-button">Book a ride now</Link>
         </div>
       </section>
     </div>
