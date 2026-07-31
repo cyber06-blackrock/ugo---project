@@ -18,7 +18,7 @@ const rideOptions = [
     id: 'auto',
     title: 'UgoAuto',
     emoji: '🛺',
-    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?auto=format&fit=crop&q=80&w=600',
+    image: 'https://images.unsplash.com/photo-1606802057180-00c5c8da6662?auto=format&fit=crop&q=80&w=600',
     desc: 'Beat the Pink City traffic with quick, affordable auto-rickshaw rides.',
     from: '₹16/km',
   },
@@ -26,7 +26,7 @@ const rideOptions = [
     id: 'bike',
     title: 'UgoMoto',
     emoji: '🏍️',
-    image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=600',
+    image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&q=80&w=600',
     desc: 'Zip through Johari Bazaar and Old City lanes on a motorbike.',
     from: '₹12/km',
   },
@@ -298,7 +298,11 @@ const Landing = () => {
                     onError={(e) => {
                       // Fallback image for auto-rickshaw if main image fails to load
                       if (opt.id === 'auto') {
-                        e.target.src = 'https://images.unsplash.com/photo-1583743089695-4b816a340f82?auto=format&fit=crop&q=80&w=600';
+                        e.target.src = 'https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?auto=format&fit=crop&q=80&w=600';
+                      }
+                      // Fallback image for bike if main image fails to load
+                      if (opt.id === 'bike') {
+                        e.target.src = 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=600';
                       }
                     }}
                   />
