@@ -33,16 +33,26 @@ const toggleAvailability = async (req, res) => {
   const { isAvailable } = req.body;
   const { mockDb, isUsingMockDb } = require('../config/db');
 
+  console.log('🔧 toggleAvailability called:', { 
+    userId: req.user?._id, 
+    userRole: req.user?.role,
+    isAvailable,
+    usingMockDb: isUsingMockDb && isUsingMockDb()
+  });
+
   try {
     // Mock database support
     if (isUsingMockDb && isUsingMockDb()) {
+      console.log('🗄️ Using mock database');
       const driver = await mockDb.findUserById(req.user._id);
+      
+      console.log('👤 Found driver:', driver ? `${driver.name} (${driver.role})` : 'null');
       
       if (driver && driver.role === 'driver') {
         driver.isAvailable = isAvailable !== undefined ? isAvailable : !driver.isAvailable;
         mockDb.users[req.user._id] = driver; // Update in mock DB
         
-        console.log(`📊 Driver ${driver.name} is now ${driver.isAvailable ? 'ONLINE' : 'OFFLINE'}`);
+        console.log(`✅ Driver ${driver.name} is now ${driver.isAvailable ? 'ONLINE' : 'OFFLINE'}`);
         
         return res.json({
           _id: driver._id,
@@ -50,6 +60,7 @@ const toggleAvailability = async (req, res) => {
           isAvailable: driver.isAvailable
         });
       } else {
+        console.log('❌ Driver not found or wrong role');
         return res.status(404).json({ message: 'Driver not found or invalid role' });
       }
     }

@@ -399,15 +399,10 @@ const Home = ({ userLocation }) => {
             </div>
           </div>
           <div className="promo-img-container">
-            <img
-              src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800"
-              alt="Professional driver in Jaipur"
-              className="promo-img"
-              loading="lazy"
-              onError={(e) => {
-                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Crect width='800' height='600' fill='%23f8fafc'/%3E%3Cpath d='M320 220h160v80H320z' fill='%23e2e8f0'/%3E%3Cpath d='M340 250h120v20H340z' fill='%23cbd5e1'/%3E%3Ctext x='400' y='350' text-anchor='middle' fill='%2394a3b8' font-family='Arial' font-size='14'%3EDriver Image%3C/text%3E%3C/svg%3E";
-              }}
-            />
+            <div className="promo-placeholder">
+              <div className="promo-placeholder-icon">🚗</div>
+              <div className="promo-placeholder-text">Professional Drivers</div>
+            </div>
           </div>
         </div>
 
@@ -415,12 +410,14 @@ const Home = ({ userLocation }) => {
         <div className="promo-row promo-row--highlight">
           <div className="promo-img-container promo-img--featured">
             <img
-              src="https://images.unsplash.com/photo-1577891038432-f37ea6f6d399?auto=format&fit=crop&q=80&w=900"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg/800px-20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg"
               alt="Amer Fort Jaipur - Pink City Landmark"
               className="promo-img promo-img--large"
               loading="lazy"
               onError={(e) => {
-                e.target.src = "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&q=80&w=900";
+                // Fallback to placeholder if image fails to load
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML = '<div class="promo-placeholder promo-placeholder--large"><div class="promo-placeholder-icon">🏰</div><div class="promo-placeholder-text">Amer Fort Jaipur</div></div>';
               }}
             />
           </div>
@@ -435,15 +432,10 @@ const Home = ({ userLocation }) => {
 
         <div className="promo-row promo-row--reverse">
           <div className="promo-img-container">
-            <img
-              src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&q=80&w=800"
-              alt="Business solutions in Jaipur"
-              className="promo-img"
-              loading="lazy"
-              onError={(e) => {
-                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Crect width='800' height='600' fill='%23f8fafc'/%3E%3Cpath d='M280 200h240v120H280z' fill='%23e2e8f0'/%3E%3Cpath d='M300 230h200v20H300z' fill='%23cbd5e1'/%3E%3Cpath d='M300 260h160v15H300z' fill='%23cbd5e1'/%3E%3Ctext x='400' y='380' text-anchor='middle' fill='%2394a3b8' font-family='Arial' font-size='14'%3EBusiness Solutions%3C/text%3E%3C/svg%3E";
-              }}
-            />
+            <div className="promo-placeholder">
+              <div className="promo-placeholder-icon">💼</div>
+              <div className="promo-placeholder-text">Business Solutions</div>
+            </div>
           </div>
           <div className="promo-text">
             <h2>The Ugo you know,<br />reimagined for business</h2>

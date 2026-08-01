@@ -154,13 +154,18 @@ const Dashboard = () => {
     const newStatus = status === 'online' ? 'offline' : 'online';
     const token = localStorage.getItem('ugo_token');
 
+    console.log('🔄 Toggle status:', { newStatus, hasToken: !!token, API_URL });
+
     try {
       if (token) {
-        await axios.put(
+        const response = await axios.put(
           `${API_URL}/api/drivers/status`,
           { isAvailable: newStatus === 'online' },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log('✅ Status update response:', response.data);
+      } else {
+        console.warn('⚠️ No token found in localStorage');
       }
 
       setStatus(newStatus);
@@ -209,7 +214,13 @@ const Dashboard = () => {
         clearInterval(timerRef.current);
       }
     } catch (err) {
-      console.error('Toggle failed:', err);
+      console.error('❌ Toggle failed:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        url: err.config?.url,
+      });
       showNotif('error', '❌ Failed to update status. Try again.');
     } finally {
       setLoading(false);

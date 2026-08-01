@@ -9,10 +9,8 @@ const Signup = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'rider',
-    profilePhoto: null
+    role: 'rider'
   });
-  const [imagePreview, setImagePreview] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -27,33 +25,6 @@ const Signup = () => {
     // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  // Handle image upload
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, profilePhoto: 'Image must be less than 5MB' }));
-        return;
-      }
-
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({ ...prev, profilePhoto: 'Please select a valid image file' }));
-        return;
-      }
-
-      setFormData(prev => ({ ...prev, profilePhoto: file }));
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -104,8 +75,7 @@ const Signup = () => {
         name: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
-        role: formData.role,
-        profilePhoto: imagePreview || null // Send base64 encoded image
+        role: formData.role
       };
 
       const res = await fetch(`${API_URL}/api/users/register`, {
@@ -120,9 +90,11 @@ const Signup = () => {
         throw new Error(data.message || 'Registration failed');
       }
 
-      // Store auth token and user data
-      localStorage.setItem('ugo_token', data.token);
-      localStorage.setItem('ugo_user', JSON.stringify(data));
+      // Store JWT token and user data
+      if (data.token) {
+        localStorage.setItem('ugo_token', data.token);
+        localStorage.setItem('ugo_user', JSON.stringify(data));
+      }
 
       setSuccess(true);
       setTimeout(() => {
@@ -162,98 +134,64 @@ const Signup = () => {
 
         {errors.general && (
           <div className="auth-error" role="alert">
-            <span className="auth-error-icon">⚠</span> {errors.general}
+            {errors.general}
           </div>
         )}
 
         <form onSubmit={handleSignup} className="auth-form">
-          {/* Profile Photo Upload */}
-          <div className="form-group">
-            <label htmlFor="profilePhoto" className="photo-upload-label">
-              {imagePreview ? (
-                <div className="photo-preview">
-                  <img src={imagePreview} alt="Preview" />
-                  <span className="change-label">Change Photo</span>
-                </div>
-              ) : (
-                <div className="photo-placeholder">
-                  <span className="photo-icon">📸</span>
-                  <span className="photo-text">Add Profile Photo</span>
-                </div>
-              )}
-              <input
-                type="file"
-                id="profilePhoto"
-                name="profilePhoto"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{ display: 'none' }}
-              />
-            </label>
-            {errors.profilePhoto && <p className="field-error">{errors.profilePhoto}</p>}
-          </div>
-
           {/* Name Field */}
           <div className="form-group">
-            <div className="input-wrap">
-              <span className="input-icon">👤</span>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Your full name"
-                autoComplete="name"
-              />
-            </div>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Your full name"
+              autoComplete="name"
+              className="auth-input"
+            />
             {errors.name && <p className="field-error">{errors.name}</p>}
           </div>
 
           {/* Email Field */}
           <div className="form-group">
-            <div className="input-wrap">
-              <span className="input-icon">✉️</span>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                autoComplete="email"
-              />
-            </div>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              autoComplete="email"
+              className="auth-input"
+            />
             {errors.email && <p className="field-error">{errors.email}</p>}
           </div>
 
           {/* Password Field */}
           <div className="form-group">
-            <div className="input-wrap">
-              <span className="input-icon">🔒</span>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="At least 6 characters"
-                autoComplete="new-password"
-              />
-            </div>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="At least 6 characters"
+              autoComplete="new-password"
+              className="auth-input"
+            />
             {errors.password && <p className="field-error">{errors.password}</p>}
           </div>
 
           {/* Confirm Password Field */}
           <div className="form-group">
-            <div className="input-wrap">
-              <span className="input-icon">🔒</span>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm password"
-                autoComplete="new-password"
-              />
-            </div>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm password"
+              autoComplete="new-password"
+              className="auth-input"
+            />
             {errors.confirmPassword && <p className="field-error">{errors.confirmPassword}</p>}
           </div>
 
@@ -265,14 +203,14 @@ const Signup = () => {
                 className={`role-btn${formData.role === 'rider' ? ' role-btn--active' : ''}`}
                 onClick={() => setFormData(prev => ({ ...prev, role: 'rider' }))}
               >
-                🚗 Rider
+                Rider
               </button>
               <button
                 type="button"
                 className={`role-btn${formData.role === 'driver' ? ' role-btn--active' : ''}`}
                 onClick={() => setFormData(prev => ({ ...prev, role: 'driver' }))}
               >
-                🚙 Driver
+                Driver
               </button>
             </div>
           </div>

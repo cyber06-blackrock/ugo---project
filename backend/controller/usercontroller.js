@@ -63,12 +63,15 @@ const registerUser = async (req, res) => {
       }
 
       // Create user in mock db
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+      
       const userData = {
         name: trimmedName,
         role: userRole,
         email: email ? email.trim().toLowerCase() : null,
         phone: phone ? phone.replace(/\D/g, '') : null,
-        password: password || null,
+        password: hashedPassword,
         profilePhoto: profilePhoto || '',
       };
 
@@ -141,15 +144,21 @@ const authUser = async (req, res) => {
     if (isUsingMockDb && isUsingMockDb()) {
       const user = await mockDb.findUserByEmail(email.trim().toLowerCase());
       
-      if (user && user.password === password) {
-        return res.json({
-          _id:   user._id,
-          name:  user.name,
-          email: user.email,
-          phone: user.phone || null,
-          role:  user.role,
-          token: generateToken(user._id),
-        });
+      if (user && user.password) {
+        // Use bcrypt to compare passwords
+        const bcrypt = require('bcryptjs');
+        const isMatch = await bcrypt.compare(password, user.password);
+        
+        if (isMatch) {
+          return res.json({
+            _id:   user._id,
+            name:  user.name,
+            email: user.email,
+            phone: user.phone || null,
+            role:  user.role,
+            token: generateToken(user._id),
+          });
+        }
       }
       
       return res.status(401).json({ message: 'Invalid email or password.' });
