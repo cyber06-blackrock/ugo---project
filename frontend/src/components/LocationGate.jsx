@@ -12,8 +12,16 @@ const LocationGate = ({ onLocationGranted, onLocationDenied }) => {
       // Already granted this session, skip the gate
       const loc = JSON.parse(sessionStorage.getItem('ugo_location') || '{}');
       onLocationGranted(loc.lat || 26.9124, loc.lng || 75.7873);
+    } else if (cached === 'false') {
+      // User already denied, skip gate
+      onLocationDenied();
+    } else {
+      // First time - auto-grant with defaults for dev
+      sessionStorage.setItem('ugo_location_granted', 'true');
+      sessionStorage.setItem('ugo_location', JSON.stringify({ lat: 26.9124, lng: 75.7873 }));
+      onLocationGranted(26.9124, 75.7873);
     }
-  }, []);
+  }, [onLocationGranted, onLocationDenied]);
 
   const handleAllowLocation = () => {
     setStatus('requesting');
