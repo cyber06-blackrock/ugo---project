@@ -15,12 +15,8 @@ const LocationGate = ({ onLocationGranted, onLocationDenied }) => {
     } else if (cached === 'false') {
       // User already denied, skip gate
       onLocationDenied();
-    } else {
-      // First time - auto-grant with defaults for dev
-      sessionStorage.setItem('ugo_location_granted', 'true');
-      sessionStorage.setItem('ugo_location', JSON.stringify({ lat: 26.9124, lng: 75.7873 }));
-      onLocationGranted(26.9124, 75.7873);
     }
+    // Show prompt for first-time visitors (no auto-grant)
   }, [onLocationGranted, onLocationDenied]);
 
   const handleAllowLocation = () => {
@@ -57,9 +53,13 @@ const LocationGate = ({ onLocationGranted, onLocationDenied }) => {
   };
 
   const handleContinueWithout = () => {
+    // Use Jaipur city center as default
+    const jaipurLat = 26.9124;
+    const jaipurLng = 75.7873;
     sessionStorage.setItem('ugo_location_granted', 'false');
+    sessionStorage.setItem('ugo_location', JSON.stringify({ lat: jaipurLat, lng: jaipurLng }));
     setAnimateOut(true);
-    setTimeout(() => onLocationDenied(), 600);
+    setTimeout(() => onLocationGranted(jaipurLat, jaipurLng), 600);
   };
 
   // Already granted in this session — render nothing
@@ -133,7 +133,7 @@ const LocationGate = ({ onLocationGranted, onLocationDenied }) => {
           <div className="lg-prompt animate-in">
             <h1 className="lg-title">Location access denied</h1>
             <p className="lg-subtitle">
-              You can still use Ugo, but we'll show drivers in the default area. You can update your location later.
+              No problem! We'll show drivers in Jaipur city center. You can update your location anytime.
             </p>
 
             <button className="lg-btn lg-btn--primary" onClick={handleAllowLocation}>
@@ -141,7 +141,7 @@ const LocationGate = ({ onLocationGranted, onLocationDenied }) => {
             </button>
 
             <button className="lg-btn lg-btn--secondary" onClick={handleContinueWithout}>
-              Continue without location
+              Continue with Jaipur center
             </button>
           </div>
         )}

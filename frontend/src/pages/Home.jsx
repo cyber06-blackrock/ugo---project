@@ -365,7 +365,223 @@ const Home = ({ userLocation }) => {
 
       {/* ── Info Sections ── */}
       <div className="info-section">
-        <h2 className="section-title">Suggestions</h2>
+        <h2 className="section-title">Ride Options in Jaipur</h2>
+        <div className="ride-options-grid">
+          <div className="ride-option-card">
+            <div className="ride-option-image" dangerouslySetInnerHTML={{ 
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="homeCarGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" /><stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#homeCarGrad)"/><g transform="translate(50,30)"><rect x="10" y="15" width="80" height="25" rx="5" fill="#fff" opacity="0.9"/><circle cx="30" cy="50" r="8" fill="#1e293b"/><circle cx="70" cy="50" r="8" fill="#1e293b"/><rect x="15" y="20" width="25" height="15" fill="#3b82f6" opacity="0.7"/><rect x="45" y="20" width="25" height="15" fill="#3b82f6" opacity="0.7"/></g></svg>` 
+            }} />
+            <div className="ride-option-content">
+              <h3>UgoX</h3>
+              <p className="ride-option-desc">Comfortable sedans at affordable prices</p>
+              <p className="ride-option-price">From ₹30/km</p>
+            </div>
+          </div>
+
+          <div className="ride-option-card">
+            <div className="ride-option-image" dangerouslySetInnerHTML={{ 
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="homeAutoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" /><stop offset="100%" style="stop-color:#d97706;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#homeAutoGrad)"/><g transform="translate(50,25)"><path d="M20,30 L30,20 L70,20 L80,30 L80,45 L20,45 Z" fill="#fbbf24" stroke="#fff" stroke-width="2"/><circle cx="35" cy="50" r="6" fill="#1e293b" stroke="#fff" stroke-width="1.5"/><circle cx="65" cy="50" r="6" fill="#1e293b" stroke="#fff" stroke-width="1.5"/><rect x="35" y="25" width="30" height="15" fill="#fff" opacity="0.3"/><text x="50" y="17" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">AUTO</text></g></svg>` 
+            }} />
+            <div className="ride-option-content">
+              <h3>UgoAuto</h3>
+              <p className="ride-option-desc">Traditional rickshaws for quick city rides</p>
+              <p className="ride-option-price">From ₹16/km</p>
+            </div>
+          </div>
+
+          <div className="ride-option-card">
+            <div className="ride-option-image" dangerouslySetInnerHTML={{ 
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="homeBikeGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981;stop-opacity:1" /><stop offset="100%" style="stop-color:#059669;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#homeBikeGrad)"/><g transform="translate(50,30)"><circle cx="25" cy="45" r="10" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="75" cy="45" r="10" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M25,45 L50,25 L60,25 L75,45" stroke="#fff" stroke-width="2.5" fill="none"/><path d="M50,25 L55,35" stroke="#fff" stroke-width="2.5"/><circle cx="50" cy="20" r="4" fill="#fff"/></g></svg>` 
+            }} />
+            <div className="ride-option-content">
+              <h3>UgoMoto</h3>
+              <p className="ride-option-desc">Fast bikes to beat Jaipur traffic</p>
+              <p className="ride-option-price">From ₹12/km</p>
+            </div>
+          </div>
+
+          <div className="ride-option-card">
+            <div className="ride-option-image" dangerouslySetInnerHTML={{ 
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="homeSuvGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" /><stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#homeSuvGrad)"/><g transform="translate(40,25)"><rect x="10" y="15" width="100" height="30" rx="5" fill="#fff" opacity="0.95"/><rect x="5" y="25" width="110" height="15" rx="3" fill="#a78bfa" opacity="0.8"/><circle cx="30" cy="50" r="9" fill="#1e293b"/><circle cx="90" cy="50" r="9" fill="#1e293b"/><rect x="20" y="20" width="30" height="18" fill="#8b5cf6" opacity="0.6"/><rect x="55" y="20" width="35" height="18" fill="#8b5cf6" opacity="0.6"/><text x="60" y="15" font-size="10" fill="#fff" text-anchor="middle" font-weight="bold">XL</text></g></svg>` 
+            }} />
+            <div className="ride-option-content">
+              <h3>UgoXL</h3>
+              <p className="ride-option-desc">Spacious SUVs for family trips</p>
+              <p className="ride-option-price">From ₹48/km</p>
+            </div>
+          </div>
+        </div>
+
+        <h2 className="section-title" style={{ marginTop: '4rem' }}>Reliable rides across Jaipur</h2>
+        <div className="jaipur-landmarks-grid">
+          <div className="landmark-card">
+            <div className="landmark-image" dangerouslySetInnerHTML={{
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+                <defs>
+                  <linearGradient id="amerSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#87CEEB"/>
+                    <stop offset="100%" style="stop-color:#F0E68C"/>
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="300" fill="url(#amerSky)"/>
+                <path d="M0,200 L100,150 L200,170 L300,140 L400,180 L400,300 L0,300 Z" fill="#8B7355" opacity="0.4"/>
+                <g transform="translate(50,80)">
+                  <rect x="0" y="100" width="300" height="120" fill="#DAA520"/>
+                  <rect x="20" y="120" width="40" height="60" fill="#8B4513" opacity="0.7"/>
+                  <rect x="80" y="120" width="40" height="60" fill="#8B4513" opacity="0.7"/>
+                  <rect x="130" y="110" width="50" height="70" fill="#8B4513" opacity="0.7"/>
+                  <rect x="200" y="120" width="40" height="60" fill="#8B4513" opacity="0.7"/>
+                  <rect x="250" y="120" width="40" height="60" fill="#8B4513" opacity="0.7"/>
+                  <circle cx="40" cy="110" r="18" fill="#CD853F"/>
+                  <path d="M28,110 L40,85 L52,110 Z" fill="#FFD700"/>
+                  <circle cx="100" cy="110" r="18" fill="#CD853F"/>
+                  <path d="M88,110 L100,85 L112,110 Z" fill="#FFD700"/>
+                  <circle cx="155" cy="100" r="20" fill="#CD853F"/>
+                  <path d="M142,100 L155,72 L168,100 Z" fill="#FFD700"/>
+                  <circle cx="220" cy="110" r="18" fill="#CD853F"/>
+                  <path d="M208,110 L220,85 L232,110 Z" fill="#FFD700"/>
+                  <circle cx="270" cy="110" r="18" fill="#CD853F"/>
+                  <path d="M258,110 L270,85 L282,110 Z" fill="#FFD700"/>
+                  <path d="M130,180 L130,220 L180,220 L180,180 Q155,170 130,180 Z" fill="#654321"/>
+                </g>
+                <!-- Animated Car -->
+                <g>
+                  <animateTransform attributeName="transform" type="translate" from="-80 0" to="480 0" dur="8s" repeatCount="indefinite"/>
+                  <rect x="20" y="260" width="60" height="25" rx="5" fill="#FFD700"/>
+                  <rect x="25" y="265" width="20" height="15" fill="#4A90E2" opacity="0.7"/>
+                  <rect x="50" y="265" width="20" height="15" fill="#4A90E2" opacity="0.7"/>
+                  <circle cx="35" cy="287" r="6" fill="#333"/>
+                  <circle cx="65" cy="287" r="6" fill="#333"/>
+                </g>
+              </svg>`
+            }} />
+            <h3>Amer Fort</h3>
+            <p>Visit the majestic hilltop fortress</p>
+          </div>
+
+          <div className="landmark-card">
+            <div className="landmark-image" dangerouslySetInnerHTML={{
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+                <defs>
+                  <linearGradient id="hawaSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FFB6C1"/>
+                    <stop offset="100%" style="stop-color:#FFA07A"/>
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="300" fill="url(#hawaSky)"/>
+                <g transform="translate(80,50)">
+                  <rect x="0" y="80" width="240" height="170" fill="#FFC0CB" opacity="0.9"/>
+                  <polygon points="0,80 120,30 240,80" fill="#FFB6C1"/>
+                  ${Array.from({length: 5}, (_, i) => `
+                    <g transform="translate(${i * 48},0)">
+                      <circle cx="24" cy="110" r="10" fill="#8B4513"/>
+                      <circle cx="24" cy="135" r="10" fill="#8B4513"/>
+                      <circle cx="24" cy="160" r="10" fill="#8B4513"/>
+                      <circle cx="24" cy="185" r="10" fill="#8B4513"/>
+                      <circle cx="24" cy="210" r="10" fill="#8B4513"/>
+                    </g>
+                  `).join('')}
+                  <rect x="100" y="200" width="40" height="50" fill="#654321"/>
+                </g>
+                <!-- Animated Auto Rickshaw -->
+                <g>
+                  <animateTransform attributeName="transform" type="translate" from="450 0" to="-100 0" dur="10s" repeatCount="indefinite"/>
+                  <path d="M30,265 L40,255 L70,255 L80,265 L80,280 L30,280 Z" fill="#FFEB3B"/>
+                  <rect x="45" y="260" width="25" height="15" fill="#4A90E2" opacity="0.6"/>
+                  <circle cx="45" cy="282" r="5" fill="#333"/>
+                  <circle cx="65" cy="282" r="5" fill="#333"/>
+                  <text x="55" y="252" font-size="8" fill="#000" text-anchor="middle">AUTO</text>
+                </g>
+              </svg>`
+            }} />
+            <h3>Hawa Mahal</h3>
+            <p>The iconic Palace of Winds</p>
+          </div>
+
+          <div className="landmark-card">
+            <div className="landmark-image" dangerouslySetInnerHTML={{
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+                <defs>
+                  <linearGradient id="palaceSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#E6E6FA"/>
+                    <stop offset="100%" style="stop-color:#DDA0DD"/>
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="300" fill="url(#palaceSky)"/>
+                <g transform="translate(60,90)">
+                  <rect x="0" y="100" width="280" height="110" fill="#F5DEB3"/>
+                  <rect x="30" y="120" width="50" height="60" fill="#8B4513" opacity="0.7"/>
+                  <rect x="100" y="110" width="80" height="70" fill="#8B4513" opacity="0.7"/>
+                  <rect x="200" y="120" width="50" height="60" fill="#8B4513" opacity="0.7"/>
+                  <polygon points="0,100 140,40 280,100" fill="#DAA520"/>
+                  <circle cx="140" cy="50" r="15" fill="#FFD700"/>
+                  <path d="M130,50 L140,30 L150,50 Z" fill="#FFD700"/>
+                  <rect x="40" y="140" width="15" height="25" fill="#4A4A4A" opacity="0.6"/>
+                  <rect x="60" y="140" width="15" height="25" fill="#4A4A4A" opacity="0.6"/>
+                  <rect x="110" y="130" width="20" height="30" fill="#4A4A4A" opacity="0.6"/>
+                  <rect x="140" y="130" width="20" height="30" fill="#4A4A4A" opacity="0.6"/>
+                  <rect x="210" y="140" width="15" height="25" fill="#4A4A4A" opacity="0.6"/>
+                  <rect x="230" y="140" width="15" height="25" fill="#4A4A4A" opacity="0.6"/>
+                </g>
+                <!-- Animated Motorcycle -->
+                <g>
+                  <animateTransform attributeName="transform" type="translate" from="-60 0" to="460 0" dur="6s" repeatCount="indefinite"/>
+                  <circle cx="35" cy="278" r="7" fill="#333"/>
+                  <circle cx="65" cy="278" r="7" fill="#333"/>
+                  <path d="M35,278 L50,265 L60,265 L65,278" stroke="#E91E63" stroke-width="3" fill="none"/>
+                  <circle cx="50" cy="260" r="3" fill="#333"/>
+                  <rect x="48" y="265" width="8" height="8" fill="#E91E63"/>
+                </g>
+              </svg>`
+            }} />
+            <h3>City Palace</h3>
+            <p>Royal heritage and museums</p>
+          </div>
+
+          <div className="landmark-card">
+            <div className="landmark-image" dangerouslySetInnerHTML={{
+              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+                <defs>
+                  <linearGradient id="waterSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#87CEEB"/>
+                    <stop offset="100%" style="stop-color:#B0E0E6"/>
+                  </linearGradient>
+                  <linearGradient id="water" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4682B4"/>
+                    <stop offset="100%" style="stop-color:#5F9EA0"/>
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="300" fill="url(#waterSky)"/>
+                <ellipse cx="200" cy="240" rx="180" ry="60" fill="url(#water)"/>
+                <ellipse cx="190" cy="235" rx="170" ry="50" fill="#5F9EA0" opacity="0.3"/>
+                <g transform="translate(120,120)">
+                  <rect x="0" y="80" width="160" height="80" fill="#DEB887"/>
+                  <polygon points="0,80 80,40 160,80" fill="#D2B48C"/>
+                  <rect x="30" y="100" width="25" height="40" fill="#8B4513" opacity="0.7"/>
+                  <rect x="60" y="95" width="40" height="45" fill="#8B4513" opacity="0.7"/>
+                  <rect x="105" y="100" width="25" height="40" fill="#8B4513" opacity="0.7"/>
+                  <circle cx="80" cy="50" r="12" fill="#CD853F"/>
+                  <path d="M72,50 L80,35 L88,50 Z" fill="#FFD700"/>
+                  <ellipse cx="200" cy="200" rx="100" ry="15" fill="#4682B4" opacity="0.2"/>
+                </g>
+                <!-- Animated SUV -->
+                <g>
+                  <animateTransform attributeName="transform" type="translate" from="450 0" to="-80 0" dur="9s" repeatCount="indefinite"/>
+                  <rect x="15" y="258" width="70" height="28" rx="5" fill="#7C4DFF"/>
+                  <rect x="20" y="263" width="25" height="18" fill="#4A90E2" opacity="0.7"/>
+                  <rect x="50" y="263" width="30" height="18" fill="#4A90E2" opacity="0.7"/>
+                  <circle cx="30" cy="288" r="7" fill="#333"/>
+                  <circle cx="70" cy="288" r="7" fill="#333"/>
+                  <text x="50" y="255" font-size="7" fill="#fff" text-anchor="middle" font-weight="bold">XL</text>
+                </g>
+              </svg>`
+            }} />
+            <h3>Jal Mahal</h3>
+            <p>The stunning Water Palace</p>
+          </div>
+        </div>
+
+        <h2 className="section-title" style={{ marginTop: '4rem' }}>Suggestions</h2>
         <div className="cards-grid">
           <div className="info-card" onClick={() => navigate('/request-ride')}>
             <div className="card-icon-wrapper"><Car size={30} /></div>
@@ -399,9 +615,9 @@ const Home = ({ userLocation }) => {
             </div>
           </div>
           <div className="promo-img-container">
-            <div className="promo-placeholder">
+            <div className="promo-placeholder promo-placeholder--driver">
               <div className="promo-placeholder-icon">🚗</div>
-              <div className="promo-placeholder-text">Professional Drivers</div>
+              <div className="promo-placeholder-text">Drive & Earn</div>
             </div>
           </div>
         </div>
@@ -409,17 +625,11 @@ const Home = ({ userLocation }) => {
         {/* ── Amer Fort Promo Banner ── */}
         <div className="promo-row promo-row--highlight">
           <div className="promo-img-container promo-img--featured">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg/800px-20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg"
-              alt="Amer Fort Jaipur - Pink City Landmark"
-              className="promo-img promo-img--large"
-              loading="lazy"
-              onError={(e) => {
-                // Fallback to placeholder if image fails to load
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<div class="promo-placeholder promo-placeholder--large"><div class="promo-placeholder-icon">🏰</div><div class="promo-placeholder-text">Amer Fort Jaipur</div></div>';
-              }}
-            />
+            <div className="promo-placeholder promo-placeholder--amer">
+              <div className="promo-placeholder-icon">🏰</div>
+              <div className="promo-placeholder-text">Amer Fort</div>
+              <div className="promo-placeholder-subtitle">Pink City Landmark</div>
+            </div>
           </div>
           <div className="promo-text promo-text--overlay">
             <h2>Explore Jaipur's Pink City</h2>
@@ -432,10 +642,15 @@ const Home = ({ userLocation }) => {
 
         <div className="promo-row promo-row--reverse">
           <div className="promo-img-container">
-            <div className="promo-placeholder">
-              <div className="promo-placeholder-icon">💼</div>
-              <div className="promo-placeholder-text">Business Solutions</div>
-            </div>
+            <img
+              src="/images/business.jpg"
+              alt="Ugo Business Solutions in Jaipur"
+              className="promo-img"
+              loading="lazy"
+              onError={(e) => {
+                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Crect width='800' height='600' fill='%23f8fafc'/%3E%3Ctext x='400' y='300' text-anchor='middle' fill='%2394a3b8' font-family='Arial' font-size='24'%3EBusiness%3C/text%3E%3C/svg%3E";
+              }}
+            />
           </div>
           <div className="promo-text">
             <h2>The Ugo you know,<br />reimagined for business</h2>
@@ -451,7 +666,7 @@ const Home = ({ userLocation }) => {
             <h2>Make money by renting out your car</h2>
             <p>Connect with thousands of drivers and earn more per week with Ugo's free fleet management tools.</p>
             <div className="promo-actions">
-              <button className="btn-secondary">Get started</button>
+              <button className="btn-secondary" onClick={() => navigate('/car-rental')}>Get started</button>
             </div>
           </div>
           <div className="promo-img-container">

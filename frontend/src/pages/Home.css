@@ -152,12 +152,12 @@
 
 .vertical-connector {
   position: absolute;
-  left: 1.15rem;
-  top: 2.4rem;
-  bottom: 2.4rem;
+  left: 1rem;
+  top: 2.2rem;
+  bottom: 2.2rem;
   width: 2px;
-  background: linear-gradient(to bottom, #bbb, #333);
-  z-index: 1;
+  background: linear-gradient(to bottom, #d1d5db, #6b7280);
+  z-index: 0;
   border-radius: 2px;
 }
 
@@ -166,7 +166,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 0.55rem;
+  margin-bottom: 1.5rem;
 }
 
 .input-group:last-child {
@@ -175,34 +175,36 @@
 
 .input-dot {
   position: absolute;
-  left: 1rem;
-  z-index: 2;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
   flex-shrink: 0;
   pointer-events: none;
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #10b981;
-  border: 2.5px solid #fff;
-  box-shadow: 0 0 0 1px #10b981, 0 2px 4px rgba(16, 185, 129, 0.3);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px #10b981, 0 2px 6px rgba(16, 185, 129, 0.4);
 }
 
 .square {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background: #ef4444;
   border-radius: 2px;
-  border: 2.5px solid #fff;
-  box-shadow: 0 0 0 1px #ef4444, 0 2px 4px rgba(239, 68, 68, 0.3);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px #ef4444, 0 2px 6px rgba(239, 68, 68, 0.4);
 }
 
 /* ── Enhanced input styling ── */
 .input-group input {
   width: 100%;
-  padding: 0.85rem 2.8rem 0.85rem 2.8rem;
+  padding: 0.85rem 2.8rem 0.85rem 2.5rem;
   font-size: 0.95rem;
   background: linear-gradient(145deg, #f8f9fa 0%, #f1f3f4 100%);
   border: 2px solid transparent;
@@ -230,6 +232,8 @@
 .locate-btn {
   position: absolute;
   right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -247,7 +251,7 @@
 .locate-btn:hover {
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.2) 100%);
   color: #111;
-  transform: scale(1.05);
+  transform: translateY(-50%) scale(1.05);
 }
 
 /* ── See prices CTA ── */
@@ -474,6 +478,12 @@
   object-position: center;
   transition: transform 0.3s ease;
   display: block;
+  background: #f3f4f6;
+}
+
+.promo-img--large {
+  object-fit: cover;
+  object-position: center;
 }
 
 .promo-img-container:hover .promo-img {
@@ -484,90 +494,72 @@
 .promo-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   position: relative;
   overflow: hidden;
 }
 
-.promo-placeholder::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 10px,
-    rgba(255, 255, 255, 0.3) 10px,
-    rgba(255, 255, 255, 0.3) 20px
-  );
-  animation: shimmer 20s linear infinite;
+/* Driver placeholder - Blue gradient */
+.promo-placeholder--driver {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
 }
 
-@keyframes shimmer {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50%, 50%); }
-}
-
-.promo-placeholder--large {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%);
+/* Amer Fort placeholder - Orange/Pink gradient (Jaipur colors) */
+.promo-placeholder--amer {
+  background: linear-gradient(135deg, #f97316 0%, #ec4899 50%, #dc2626 100%);
   position: relative;
 }
 
-.promo-placeholder--large::before {
-  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
-  animation: none;
-}
-
-.promo-placeholder--large::after {
+.promo-placeholder--amer::before {
   content: '🏰';
   position: absolute;
-  font-size: 15rem;
-  opacity: 0.15;
+  font-size: 20rem;
+  opacity: 0.1;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotate(-10deg);
   pointer-events: none;
 }
 
+/* Business placeholder - Purple gradient */
+.promo-placeholder--business {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+}
+
 .promo-placeholder-icon {
-  font-size: 5rem;
-  opacity: 0.9;
+  font-size: 6rem;
   position: relative;
   z-index: 1;
   animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-15px); }
 }
 
 .promo-placeholder-text {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #64748b;
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   position: relative;
   z-index: 1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.promo-placeholder--large .promo-placeholder-icon {
-  font-size: 6rem;
-  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
-}
-
-.promo-placeholder--large .promo-placeholder-text {
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 1.5rem;
+.promo-placeholder-subtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 1;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -1040,4 +1032,239 @@
   .promo-row--highlight .promo-text h2 {
     font-size: 1.5rem;
   }
+}
+
+
+/* ══════════════════════════════════════
+   RIDE OPTIONS GRID — Professional Layout
+══════════════════════════════════════ */
+.ride-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0 3rem;
+  padding: 0 2rem;
+}
+
+.ride-option-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.ride-option-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.ride-option-image {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  border-radius: 12px 12px 0 0;
+}
+
+.ride-option-image svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ride-option-content {
+  padding: 1.5rem;
+}
+
+.ride-option-content h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: #000;
+}
+
+.ride-option-desc {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.ride-option-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════
+   JAIPUR LANDMARKS GRID
+══════════════════════════════════════ */
+.jaipur-landmarks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0 3rem;
+  padding: 0 2rem;
+}
+
+.landmark-card {
+  text-align: center;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.landmark-card:hover {
+  transform: scale(1.05);
+}
+
+.landmark-image {
+  height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.landmark-image svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.landmark-card h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: #000;
+}
+
+.landmark-card p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+@keyframes floatAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ══════════════════════════════════════
+   SECTION TITLE STYLING
+══════════════════════════════════════ */
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 3rem 0 1rem;
+  color: #000;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE DESIGN
+══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .ride-options-grid,
+  .jaipur-landmarks-grid {
+    grid-template-columns: 1fr;
+    padding: 0 1rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .landmark-image {
+    height: 240px !important;
+    font-size: 6rem !important;
+  }
+}
+
+
+/* ══════════════════════════════════════
+   ANIMATED VEHICLES ON LANDMARKS
+══════════════════════════════════════ */
+.landmark-image {
+  position: relative;
+  overflow: visible !important;
+}
+
+.landmark-image::after {
+  content: '🚗';
+  position: absolute;
+  bottom: 20px;
+  left: -50px;
+  font-size: 2rem;
+  animation: driveAcross 8s linear infinite;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+}
+
+.landmark-card:nth-child(1) .landmark-image::after {
+  content: '🚗';
+  animation: driveAcross 8s linear infinite;
+}
+
+.landmark-card:nth-child(2) .landmark-image::after {
+  content: '🛺';
+  animation: driveAcrossReverse 10s linear infinite;
+  left: auto;
+  right: -50px;
+}
+
+.landmark-card:nth-child(3) .landmark-image::after {
+  content: '🏍️';
+  animation: driveAcross 6s linear infinite;
+  animation-delay: 1s;
+}
+
+.landmark-card:nth-child(4) .landmark-image::after {
+  content: '🚙';
+  animation: driveAcrossReverse 9s linear infinite;
+  left: auto;
+  right: -50px;
+  animation-delay: 2s;
+}
+
+@keyframes driveAcross {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(450px);
+    opacity: 0;
+  }
+}
+
+@keyframes driveAcrossReverse {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-450px);
+    opacity: 0;
+  }
+}
+
+/* Add bounce effect to vehicles */
+.landmark-card:hover .landmark-image::after {
+  animation-play-state: paused;
 }

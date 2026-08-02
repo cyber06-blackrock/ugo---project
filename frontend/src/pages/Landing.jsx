@@ -11,15 +11,17 @@ const rideOptions = [
     title: 'UgoX',
     emoji: '🚗',
     from: '₹30/km',
-    image: 'https://images.unsplash.com/photo-1549399542-7e3f3b76fc5d?auto=format&fit=crop&q=80&w=600',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="carGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" /><stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#carGrad1)"/><g transform="translate(50,30)"><rect x="10" y="15" width="80" height="25" rx="5" fill="#fff" opacity="0.9"/><circle cx="30" cy="50" r="8" fill="#1e293b"/><circle cx="70" cy="50" r="8" fill="#1e293b"/><rect x="15" y="20" width="25" height="15" fill="#3b82f6" opacity="0.7"/><rect x="45" y="20" width="25" height="15" fill="#3b82f6" opacity="0.7"/></g></svg>`,
+    gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
     desc: 'Comfortable sedans for everyday rides across Jaipur — Amer Fort to Airport.',
   },
   {
     id: 'auto',
     title: 'UgoAuto',
-    emoji: '🏎️',
+    emoji: '🛺',
     from: '₹16/km',
-    image: 'https://images.unsplash.com/photo-1609695001873-3297510ef4c3?auto=format&fit=crop&q=80&w=600',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="autoGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" /><stop offset="100%" style="stop-color:#d97706;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#autoGrad1)"/><g transform="translate(50,25)"><path d="M20,30 L30,20 L70,20 L80,30 L80,45 L20,45 Z" fill="#fbbf24" stroke="#fff" stroke-width="2"/><circle cx="35" cy="50" r="6" fill="#1e293b" stroke="#fff" stroke-width="1.5"/><circle cx="65" cy="50" r="6" fill="#1e293b" stroke="#fff" stroke-width="1.5"/><rect x="35" y="25" width="30" height="15" fill="#fff" opacity="0.3"/><text x="50" y="17" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">AUTO</text></g></svg>`,
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     desc: 'Beat the Pink City traffic with quick, affordable auto-rickshaw rides.',
   },
   {
@@ -27,7 +29,8 @@ const rideOptions = [
     title: 'UgoMoto',
     emoji: '🏍️',
     from: '₹12/km',
-    image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=600',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="bikeGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981;stop-opacity:1" /><stop offset="100%" style="stop-color:#059669;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#bikeGrad1)"/><g transform="translate(50,30)"><circle cx="25" cy="45" r="10" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="75" cy="45" r="10" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M25,45 L50,25 L60,25 L75,45" stroke="#fff" stroke-width="2.5" fill="none"/><path d="M50,25 L55,35" stroke="#fff" stroke-width="2.5"/><circle cx="50" cy="20" r="4" fill="#fff"/></g></svg>`,
+    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     desc: 'Zip through Johari Bazaar and Old City lanes on a motorbike.',
   },
   {
@@ -35,7 +38,8 @@ const rideOptions = [
     title: 'UgoXL',
     emoji: '🚙',
     from: '₹48/km',
-    image: 'https://images.unsplash.com/photo-1555636222-cff2045dd1f7?auto=format&fit=crop&q=80&w=600',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><defs><linearGradient id="suvGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" /><stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" /></linearGradient></defs><rect width="200" height="100" fill="url(#suvGrad1)"/><g transform="translate(40,25)"><rect x="10" y="15" width="100" height="30" rx="5" fill="#fff" opacity="0.95"/><rect x="5" y="25" width="110" height="15" rx="3" fill="#a78bfa" opacity="0.8"/><circle cx="30" cy="50" r="9" fill="#1e293b"/><circle cx="90" cy="50" r="9" fill="#1e293b"/><rect x="20" y="20" width="30" height="18" fill="#8b5cf6" opacity="0.6"/><rect x="55" y="20" width="35" height="18" fill="#8b5cf6" opacity="0.6"/><text x="60" y="15" font-size="10" fill="#fff" text-anchor="middle" font-weight="bold">XL</text></g></svg>`,
+    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
     desc: 'Spacious SUVs for family trips to Amer Fort or group outings.',
   },
 ];
@@ -221,15 +225,36 @@ const Landing = () => {
         <div
           className="hero-image"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1577891038432-f37ea6f6d399?auto=format&fit=crop&q=80&w=900')"
+            backgroundImage: "url('/images/amer-fort.jpg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            position: 'relative'
           }}
         >
-          <div className="hero-image-overlay">
-            <div className="hero-highlights">
-              <div className="hero-highlight-chip">🏰 Amer Fort</div>
-              <div className="hero-highlight-chip">🏯 Hawa Mahal</div>
-              <div className="hero-highlight-chip">🌸 Pink City</div>
-            </div>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            padding: '3rem'
+          }}>
+            <h1 style={{
+              fontSize: '4rem',
+              fontWeight: 'bold',
+              color: '#fff',
+              textShadow: '3px 3px 10px rgba(0,0,0,0.8)',
+              marginBottom: '1rem',
+              textAlign: 'center'
+            }}>Discover Jaipur</h1>
+            <p style={{
+              fontSize: '1.8rem',
+              color: '#fff',
+              textShadow: '2px 2px 6px rgba(0,0,0,0.8)',
+              textAlign: 'center'
+            }}>The Pink City Awaits - Ride with elephants to the majestic fort</p>
           </div>
         </div>
       </section>
@@ -251,17 +276,8 @@ const Landing = () => {
           <div className="grid-3">
             {rideOptions.map((opt) => (
               <div className="card" key={opt.id} onClick={() => setSelectedOption(opt)}>
-                <div className="card-img-wrap">
-                  <img 
-                    src={opt.image} 
-                    alt={opt.title}
-                    loading="lazy"
-                    onError={(e) => {
-                      e.target.src = 'https://images.unsplash.com/photo-1544589552-1c4d649e0c30?auto=format&fit=crop&q=80&w=600';
-                    }}
-                  />
-                  <div className="card-emoji">{opt.emoji}</div>
-                </div>
+                <div className="card-img-wrap" dangerouslySetInnerHTML={{ __html: opt.svg }} />
+
                 <div className="card-content">
                   <div className="card-title-row">
                     <h3>{opt.title}</h3>
@@ -371,7 +387,10 @@ const Landing = () => {
             <div
               className="image-content"
               style={{
-                backgroundImage: "url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&q=80&w=900')"
+                backgroundImage: "url('/images/jaipurview.jpg')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                minHeight: '400px'
               }}
             />
           </div>
@@ -402,7 +421,7 @@ const Landing = () => {
         <div className="modal-overlay" onClick={() => setSelectedOption(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <img src={selectedOption.image} alt={selectedOption.title} className="modal-img" />
+              <div className="modal-img-placeholder" dangerouslySetInnerHTML={{ __html: selectedOption.svg }} />
               <button className="close-btn" onClick={() => setSelectedOption(null)}>
                 ✕
               </button>

@@ -11,6 +11,8 @@ import Business from './pages/Business';
 import ContactSales from './pages/ContactSales';
 import Package from './pages/Package';
 import Reserve from './pages/Reserve';
+import CarRental from './pages/CarRental';
+import Help from './pages/Help';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import SimpleSignup from './pages/SimpleSignup';
@@ -94,6 +96,7 @@ function AppContent() {
               <Link to="/ride" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Ride</Link>
               <Link to="/driver-onboarding" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Drive</Link>
               <Link to="/business" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Business</Link>
+              <Link to="/help" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Help</Link>
               <Link to="/about" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>About Us</Link>
             </nav>
           )}
@@ -136,6 +139,7 @@ function AppContent() {
             <Link to="/ride" onClick={closeMenu}>🚗 Ride</Link>
             <Link to="/driver-onboarding" onClick={closeMenu}>🚙 Drive</Link>
             <Link to="/business" onClick={closeMenu}>💼 Business</Link>
+            <Link to="/help" onClick={closeMenu}>💬 Help</Link>
             <Link to="/about" onClick={closeMenu}>ℹ️ About Us</Link>
             <Link to="/sustainability" onClick={closeMenu}>🌿 Sustainability</Link>
             <Link to="/reserve" onClick={closeMenu}>📅 Reserve</Link>
@@ -171,6 +175,8 @@ function AppContent() {
           <Route path="/contact-sales" element={<ContactSales />} />
           <Route path="/package" element={<Package />} />
           <Route path="/reserve" element={<Reserve />} />
+          <Route path="/car-rental" element={<CarRental />} />
+          <Route path="/help" element={<Help />} />
           <Route path="/about" element={<About />} />
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/login" element={<Login />} />
