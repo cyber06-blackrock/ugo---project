@@ -20,8 +20,15 @@ const server = http.createServer(app);
 // Setup Socket.io for Real-time tracking
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: process.env.NODE_ENV === 'production' 
+      ? [
+          'https://ugo-frontend.vercel.app',
+          'https://ugo-jaipur.vercel.app', 
+          /\.vercel\.app$/  // Allow all Vercel preview deployments
+        ]
+      : '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
   }
 });
 
@@ -29,7 +36,16 @@ const io = new Server(server, {
 app.set('io', io);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? [
+        'https://ugo-frontend.vercel.app',
+        'https://ugo-jaipur.vercel.app',
+        /\.vercel\.app$/
+      ]
+    : '*',
+  credentials: true
+}));
 app.use(express.json());
 
 // Request logging middleware
