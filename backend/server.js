@@ -22,6 +22,7 @@ const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
       ? [
+          'https://frontend-iota-two-94.vercel.app',
           'https://ugo-frontend.vercel.app',
           'https://ugo-jaipur.vercel.app', 
           /\.vercel\.app$/  // Allow all Vercel preview deployments
@@ -39,6 +40,7 @@ app.set('io', io);
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? [
+        'https://frontend-iota-two-94.vercel.app',
         'https://ugo-frontend.vercel.app',
         'https://ugo-jaipur.vercel.app',
         /\.vercel\.app$/
