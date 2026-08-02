@@ -103,6 +103,10 @@ const RideRequest = () => {
   const [driverArrived, setDriverArrived] = useState(false);
   const [historyLocs,   setHistoryLocs]   = useState([]);
   const [mapCenter,     setMapCenter]     = useState([JAIPUR.lat, JAIPUR.lng]);
+  const [bookingTime,   setBookingTime]   = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelling,    setCancelling]    = useState(false);
+  const [currentRideId, setCurrentRideId] = useState(null);
 
   // ── Seed 4 mock drivers around Jaipur ──────────────────────────────────
   useEffect(() => {
@@ -202,12 +206,13 @@ const RideRequest = () => {
   const handleRequestRide = async () => {
     if (!selectedQuote) return;
     setFareStatus('requested');
+    setBookingTime(Date.now()); // Record booking time for cancellation fee
     try {
       let userId = '64e3f192b45a1b0012345678';
       const userStr = localStorage.getItem('ugo_user');
       if (userStr) { const u = JSON.parse(userStr); if (u._id) userId = u._id; }
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_URL}/api/rides/request`, {
+      const response = await axios.post(`${API_URL}/api/rides/request`, {
         riderId:       userId,
         pickup, dropoff,
         fare:          selectedQuote.price,
@@ -215,8 +220,84 @@ const RideRequest = () => {
         pickupCoords:  routeData?.pickupCoords,
         dropoffCoords: routeData?.dropoffCoords,
       });
-    } catch { /* fall through to tracking */ }
+      
+      // Save ride ID for cancellation
+      if (response.data._id) {
+        setCurrentRideId(response.data._id);
+        console.log('✅ Ride created with ID:', response.data._id);
+      }
+    } catch (err) { 
+      console.error('❌ Ride request error:', err);
+    }
     setFareStatus('tracking');
+  };
+
+  // ── Cancel ride with fee calculation ────────────────────────────────────
+  const handleCancelRide = () => {
+    setShowCancelModal(true);
+  };
+
+  const confirmCancellation = async () => {
+    setCancelling(true);
+    
+    // Calculate cancellation fee
+    const minutesSinceBooking = bookingTime ? (Date.now() - bookingTime) / 60000 : 0;
+    let cancellationFee = 0;
+    
+    if (minutesSinceBooking > 2) {
+      // Cancellation fees by ride type
+      const fees = {
+        'UgoAuto': 15,
+        'UgoMoto': 15,
+        'UgoX': 30,
+        'UgoXL': 40,
+        'UgoBlack': 50
+      };
+      cancellationFee = fees[selectedQuote?.type] || 30;
+      
+      // If driver has arrived, charge full cancellation fee
+      if (driverArrived) {
+        cancellationFee = fees[selectedQuote?.type] || 50;
+      }
+    }
+    
+    // Call backend API to cancel ride
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      if (currentRideId) {
+        const response = await axios.post(`${API_URL}/api/rides/${currentRideId}/cancel`, {
+          reason: 'user_request',
+          cancellationFee
+        });
+        console.log('✅ Ride cancelled:', response.data);
+      }
+    } catch (err) {
+      console.error('❌ Cancel API error:', err);
+    }
+    
+    setTimeout(() => {
+      setCancelling(false);
+      setShowCancelModal(false);
+      
+      if (cancellationFee > 0) {
+        alert(`Ride cancelled.\nCancellation fee: ₹${cancellationFee}\n\nFee charged because ${driverArrived ? 'driver has arrived' : 'cancellation after 2 minutes'}.`);
+      } else {
+        alert('Ride cancelled successfully!\nNo cancellation fee (cancelled within 2 minutes).');
+      }
+      
+      // Reset to initial state
+      setFareStatus(null);
+      setSelectedQuote(null);
+      setRouteData(null);
+      setDriverPos(null);
+      setDriverArrived(false);
+      setBookingTime(null);
+      setCurrentRideId(null);
+    }, 1000);
+  };
+
+  const closeCancelModal = () => {
+    setShowCancelModal(false);
   };
 
   // ── Route polyline points ───────────────────────────────────────────────
@@ -339,6 +420,13 @@ const RideRequest = () => {
                   <strong>{driverMetrics.eta} min</strong>
                 </div>
               </div>
+              <button 
+                type="button" 
+                onClick={handleCancelRide} 
+                className="btn-cancel rr-cancel-btn"
+              >
+                Cancel Ride
+              </button>
             </div>
           )}
 
@@ -441,6 +529,63 @@ const RideRequest = () => {
           )}
         </MapContainer>
       </div>
+
+      {/* ── Cancel Confirmation Modal ── */}
+      {showCancelModal && (
+        <div className="rr-modal-overlay" onClick={closeCancelModal}>
+          <div className="rr-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="rr-modal-header">
+              <h3>Cancel Ride?</h3>
+              <button className="rr-modal-close" onClick={closeCancelModal}>×</button>
+            </div>
+            <div className="rr-modal-body">
+              <p className="rr-modal-warning">
+                ⚠️ Are you sure you want to cancel this ride?
+              </p>
+              <div className="rr-modal-info">
+                <p><strong>Ride Type:</strong> {selectedQuote?.type}</p>
+                <p><strong>Fare:</strong> ₹{selectedQuote?.price}</p>
+                <p><strong>From:</strong> {pickup}</p>
+                <p><strong>To:</strong> {dropoff}</p>
+              </div>
+              <div className="rr-modal-fee-info">
+                {bookingTime && (Date.now() - bookingTime) / 60000 <= 2 ? (
+                  <div className="rr-fee-notice rr-fee-free">
+                    ✅ <strong>Free Cancellation</strong>
+                    <p>No charges (within 2 minutes of booking)</p>
+                  </div>
+                ) : driverArrived ? (
+                  <div className="rr-fee-notice rr-fee-charged">
+                    💰 <strong>Cancellation Fee: ₹{selectedQuote?.type === 'UgoAuto' || selectedQuote?.type === 'UgoMoto' ? '15' : selectedQuote?.type === 'UgoXL' ? '40' : '30'}</strong>
+                    <p>Driver has arrived at pickup location</p>
+                  </div>
+                ) : (
+                  <div className="rr-fee-notice rr-fee-charged">
+                    💰 <strong>Cancellation Fee: ₹{selectedQuote?.type === 'UgoAuto' || selectedQuote?.type === 'UgoMoto' ? '15' : selectedQuote?.type === 'UgoXL' ? '40' : '30'}</strong>
+                    <p>Cancellation after 2 minutes of booking</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="rr-modal-footer">
+              <button 
+                className="btn-secondary rr-modal-btn" 
+                onClick={closeCancelModal}
+                disabled={cancelling}
+              >
+                Keep Ride
+              </button>
+              <button 
+                className="btn-danger rr-modal-btn" 
+                onClick={confirmCancellation}
+                disabled={cancelling}
+              >
+                {cancelling ? 'Cancelling...' : 'Yes, Cancel Ride'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

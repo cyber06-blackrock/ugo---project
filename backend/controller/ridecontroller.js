@@ -1,4 +1,6 @@
 const Ride = require('../Models/ride');
+const { isUsingMockDb } = require('../config/db');
+const mockDb = require('../config/mockDb');
 
 // ── Haversine formula ────────────────────────────────────────────────────────
 const haversineKm = (lat1, lon1, lat2, lon2) => {
@@ -137,25 +139,64 @@ const requestRide = async (req, res) => {
   const { riderId, pickup, dropoff, fare, distance, pickupCoords, dropoffCoords } = req.body;
 
   try {
-    const newRide = await Ride.create({
-      rider: riderId,
-      pickupLocation: {
-        address: pickup,
-        lat: pickupCoords?.lat  ?? 26.9124 + Math.random() * 0.01,
-        lng: pickupCoords?.lng  ?? 75.7873 + Math.random() * 0.01,
-      },
-      dropoffLocation: {
-        address: dropoff,
-        lat: dropoffCoords?.lat ?? 26.9224 + Math.random() * 0.01,
-        lng: dropoffCoords?.lng ?? 75.7973 + Math.random() * 0.01,
-      },
-      fare:     fare     || 0,
-      distance: distance || '0 km',
-      status:   'requested',
-    });
+    let newRide;
+    
+    // Use mock database if MongoDB is not available
+    if (isUsingMockDb()) {
+      newRide = await mockDb.createRide({
+        rider: riderId,
+        pickupLocation: {
+          address: pickup,
+          lat: pickupCoords?.lat  ?? 26.9124 + Math.random() * 0.01,
+          lng: pickupCoords?.lng  ?? 75.7873 + Math.random() * 0.01,
+        },
+        dropoffLocation: {
+          address: dropoff,
+          lat: dropoffCoords?.lat ?? 26.9224 + Math.random() * 0.01,
+          lng: dropoffCoords?.lng ?? 75.7973 + Math.random() * 0.01,
+        },
+        fare:     fare     || 0,
+        distance: distance || '0 km',
+        status:   'requested',
+      });
+    } else {
+      newRide = await Ride.create({
+        rider: riderId,
+        pickupLocation: {
+          address: pickup,
+          lat: pickupCoords?.lat  ?? 26.9124 + Math.random() * 0.01,
+          lng: pickupCoords?.lng  ?? 75.7873 + Math.random() * 0.01,
+        },
+        dropoffLocation: {
+          address: dropoff,
+          lat: dropoffCoords?.lat ?? 26.9224 + Math.random() * 0.01,
+          lng: dropoffCoords?.lng ?? 75.7973 + Math.random() * 0.01,
+        },
+        fare:     fare     || 0,
+        distance: distance || '0 km',
+        status:   'requested',
+      });
+    }
+
+    // Emit ride request to all online drivers via Socket.IO
+    if (req.app.get('io')) {
+      req.app.get('io').emit('rideRequest', {
+        _id: newRide._id,
+        pickup: pickup,
+        dropoff: dropoff,
+        fare: fare,
+        distance: distance,
+        pickupCoords: newRide.pickupLocation,
+        dropoffCoords: newRide.dropoffLocation,
+        riderId: riderId,
+        status: 'requested'
+      });
+      console.log('🚗 Ride request broadcast to drivers:', newRide._id);
+    }
 
     res.status(201).json(newRide);
   } catch (error) {
+    console.error('❌ Ride request error:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -163,9 +204,19 @@ const requestRide = async (req, res) => {
 // ── GET /api/rides/active ────────────────────────────────────────────────────
 const getActiveRides = async (req, res) => {
   try {
-    const rides = await Ride.find({ status: 'requested' }).populate('rider', 'name');
+    let rides;
+    
+    // Use mock database if MongoDB is not available
+    if (isUsingMockDb()) {
+      rides = await mockDb.findRides({ status: 'requested' });
+    } else {
+      rides = await Ride.find({ status: 'requested' }).populate('rider', 'name');
+    }
+    
+    console.log('📋 Active rides found:', rides.length);
     res.json(rides);
   } catch (error) {
+    console.error('❌ Get active rides error:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -173,10 +224,19 @@ const getActiveRides = async (req, res) => {
 // ── GET /api/rides/history/:userId ───────────────────────────────────────────
 const getUserRideHistory = async (req, res) => {
   try {
-    const rides = await Ride.find({ rider: req.params.userId })
-      .select('pickupLocation.address dropoffLocation.address')
-      .sort({ createdAt: -1 })
-      .limit(10);
+    let rides;
+    
+    // Use mock database if MongoDB is not available
+    if (isUsingMockDb()) {
+      rides = await mockDb.findRides({ rider: req.params.userId });
+      rides = rides.slice(0, 10).reverse(); // Get last 10
+    } else {
+      rides = await Ride.find({ rider: req.params.userId })
+        .select('pickupLocation.address dropoffLocation.address')
+        .sort({ createdAt: -1 })
+        .limit(10);
+    }
+    
     res.json(rides);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -186,18 +246,77 @@ const getUserRideHistory = async (req, res) => {
 // ── PUT /api/rides/:id/accept ────────────────────────────────────────────────
 const acceptRide = async (req, res) => {
   try {
-    const ride = await Ride.findById(req.params.id);
-    if (!ride) return res.status(404).json({ message: 'Ride not found' });
-    if (ride.status !== 'requested') {
-      return res.status(400).json({ message: 'Ride is no longer available' });
+    let ride;
+    
+    // Use mock database if MongoDB is not available
+    if (isUsingMockDb()) {
+      ride = await mockDb.findRideById(req.params.id);
+      if (!ride) return res.status(404).json({ message: 'Ride not found' });
+      if (ride.status !== 'requested') {
+        return res.status(400).json({ message: 'Ride is no longer available' });
+      }
+      ride = await mockDb.updateRide(req.params.id, {
+        status: 'accepted',
+        driver: req.user?._id || null,
+      });
+    } else {
+      ride = await Ride.findById(req.params.id);
+      if (!ride) return res.status(404).json({ message: 'Ride not found' });
+      if (ride.status !== 'requested') {
+        return res.status(400).json({ message: 'Ride is no longer available' });
+      }
+      ride.status = 'accepted';
+      ride.driver = req.user?._id || null;
+      await ride.save();
     }
-    ride.status = 'accepted';
-    ride.driver = req.user?._id || null;
-    await ride.save();
+    
     res.json(ride);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { requestRide, getActiveRides, getUserRideHistory, getQuote, acceptRide };
+// ── POST /api/rides/:id/cancel ──────────────────────────────────────────────
+const cancelRide = async (req, res) => {
+  try {
+    const { reason, cancellationFee } = req.body;
+    let ride;
+    
+    // Use mock database if MongoDB is not available
+    if (isUsingMockDb()) {
+      ride = await mockDb.findRideById(req.params.id);
+      if (!ride) return res.status(404).json({ message: 'Ride not found' });
+      
+      ride = await mockDb.updateRide(req.params.id, {
+        status: 'cancelled',
+        cancellationReason: reason || 'user_request',
+        cancellationFee: cancellationFee || 0,
+      });
+    } else {
+      ride = await Ride.findById(req.params.id);
+      if (!ride) return res.status(404).json({ message: 'Ride not found' });
+      
+      ride.status = 'cancelled';
+      ride.cancellationReason = reason || 'user_request';
+      ride.cancellationFee = cancellationFee || 0;
+      await ride.save();
+    }
+    
+    // Emit cancellation to driver via Socket.IO
+    if (req.app.get('io')) {
+      req.app.get('io').emit('rideCancelled', {
+        rideId: req.params.id,
+        reason: reason,
+        cancellationFee: cancellationFee,
+      });
+      console.log('❌ Ride cancelled, notifying drivers:', req.params.id);
+    }
+    
+    res.json({ message: 'Ride cancelled successfully', ride, cancellationFee });
+  } catch (error) {
+    console.error('❌ Cancel ride error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { requestRide, getActiveRides, getUserRideHistory, getQuote, acceptRide, cancelRide };
