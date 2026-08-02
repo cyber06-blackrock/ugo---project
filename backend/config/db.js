@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const mockDb = require('./mockDb');
 
-let isUsingMockDb = false;
+let isUsingMockDb = true; // Start as true, will be false when MongoDB connects
 let connectionAttempts = 0;
 
 const connectDB = async () => {
@@ -23,6 +23,7 @@ const connectDB = async () => {
     });
 
     console.log(`✅  MongoDB connected: ${conn.connection.host}`);
+    console.log('💾  Using MongoDB Atlas for data storage');
     isUsingMockDb = false;
     connectionAttempts = 0;
 

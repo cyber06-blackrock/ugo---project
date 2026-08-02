@@ -110,6 +110,4 @@ const mockDb = {
   },
 };
 
-console.log('📦 Using in-memory mock database for development');
-
 module.exports = mockDb;
