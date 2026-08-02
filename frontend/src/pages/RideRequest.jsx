@@ -107,6 +107,7 @@ const RideRequest = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling,    setCancelling]    = useState(false);
   const [currentRideId, setCurrentRideId] = useState(null);
+  const [cancelReason,  setCancelReason]  = useState('');
 
   // ── Seed 4 mock drivers around Jaipur ──────────────────────────────────
   useEffect(() => {
@@ -238,6 +239,11 @@ const RideRequest = () => {
   };
 
   const confirmCancellation = async () => {
+    if (!cancelReason) {
+      alert('Please select a reason for cancellation');
+      return;
+    }
+    
     setCancelling(true);
     
     // Calculate cancellation fee
@@ -266,7 +272,7 @@ const RideRequest = () => {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       if (currentRideId) {
         const response = await axios.post(`${API_URL}/api/rides/${currentRideId}/cancel`, {
-          reason: 'user_request',
+          reason: cancelReason,
           cancellationFee
         });
         console.log('✅ Ride cancelled:', response.data);
@@ -280,9 +286,9 @@ const RideRequest = () => {
       setShowCancelModal(false);
       
       if (cancellationFee > 0) {
-        alert(`Ride cancelled.\nCancellation fee: ₹${cancellationFee}\n\nFee charged because ${driverArrived ? 'driver has arrived' : 'cancellation after 2 minutes'}.`);
+        alert(`Ride cancelled.\n\nReason: ${cancelReason}\nCancellation fee: ₹${cancellationFee}\n\nFee charged because ${driverArrived ? 'driver has arrived' : 'cancellation after 2 minutes'}.`);
       } else {
-        alert('Ride cancelled successfully!\nNo cancellation fee (cancelled within 2 minutes).');
+        alert(`Ride cancelled successfully!\n\nReason: ${cancelReason}\nNo cancellation fee (cancelled within 2 minutes).`);
       }
       
       // Reset to initial state
@@ -293,11 +299,13 @@ const RideRequest = () => {
       setDriverArrived(false);
       setBookingTime(null);
       setCurrentRideId(null);
+      setCancelReason('');
     }, 1000);
   };
 
   const closeCancelModal = () => {
     setShowCancelModal(false);
+    setCancelReason('');
   };
 
   // ── Route polyline points ───────────────────────────────────────────────
@@ -540,8 +548,78 @@ const RideRequest = () => {
             </div>
             <div className="rr-modal-body">
               <p className="rr-modal-warning">
-                ⚠️ Are you sure you want to cancel this ride?
+                ⚠️ Why do you want to cancel this ride?
               </p>
+              
+              {/* Cancellation Reason Selection */}
+              <div className="rr-cancel-reasons">
+                <label className={`rr-reason-option ${cancelReason === 'Driver is taking too long' ? 'rr-reason-selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value="Driver is taking too long"
+                    checked={cancelReason === 'Driver is taking too long'}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                  />
+                  <span>🕐 Driver is taking too long</span>
+                </label>
+                
+                <label className={`rr-reason-option ${cancelReason === 'Change of plans' ? 'rr-reason-selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value="Change of plans"
+                    checked={cancelReason === 'Change of plans'}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                  />
+                  <span>📅 Change of plans</span>
+                </label>
+                
+                <label className={`rr-reason-option ${cancelReason === 'Booked by mistake' ? 'rr-reason-selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value="Booked by mistake"
+                    checked={cancelReason === 'Booked by mistake'}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                  />
+                  <span>❌ Booked by mistake</span>
+                </label>
+                
+                <label className={`rr-reason-option ${cancelReason === 'Price is too high' ? 'rr-reason-selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value="Price is too high"
+                    checked={cancelReason === 'Price is too high'}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                  />
+                  <span>💰 Price is too high</span>
+                </label>
+                
+                <label className={`rr-reason-option ${cancelReason === 'Found another ride' ? 'rr-reason-selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value="Found another ride"
+                    checked={cancelReason === 'Found another ride'}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                  />
+                  <span>🚗 Found another ride</span>
+                </label>
+                
+                <label className={`rr-reason-option ${cancelReason === 'Other reason' ? 'rr-reason-selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value="Other reason"
+                    checked={cancelReason === 'Other reason'}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                  />
+                  <span>📝 Other reason</span>
+                </label>
+              </div>
+              
               <div className="rr-modal-info">
                 <p><strong>Ride Type:</strong> {selectedQuote?.type}</p>
                 <p><strong>Fare:</strong> ₹{selectedQuote?.price}</p>
@@ -556,12 +634,12 @@ const RideRequest = () => {
                   </div>
                 ) : driverArrived ? (
                   <div className="rr-fee-notice rr-fee-charged">
-                    💰 <strong>Cancellation Fee: ₹{selectedQuote?.type === 'UgoAuto' || selectedQuote?.type === 'UgoMoto' ? '15' : selectedQuote?.type === 'UgoXL' ? '40' : '30'}</strong>
+                    💰 <strong>Cancellation Fee: ₹{selectedQuote?.type === 'UgoAuto' || selectedQuote?.type === 'UgoMoto' ? '15' : selectedQuote?.type === 'UgoXL' ? '40' : selectedQuote?.type === 'UgoBlack' ? '50' : '30'}</strong>
                     <p>Driver has arrived at pickup location</p>
                   </div>
                 ) : (
                   <div className="rr-fee-notice rr-fee-charged">
-                    💰 <strong>Cancellation Fee: ₹{selectedQuote?.type === 'UgoAuto' || selectedQuote?.type === 'UgoMoto' ? '15' : selectedQuote?.type === 'UgoXL' ? '40' : '30'}</strong>
+                    💰 <strong>Cancellation Fee: ₹{selectedQuote?.type === 'UgoAuto' || selectedQuote?.type === 'UgoMoto' ? '15' : selectedQuote?.type === 'UgoXL' ? '40' : selectedQuote?.type === 'UgoBlack' ? '50' : '30'}</strong>
                     <p>Cancellation after 2 minutes of booking</p>
                   </div>
                 )}
@@ -578,9 +656,9 @@ const RideRequest = () => {
               <button 
                 className="btn-danger rr-modal-btn" 
                 onClick={confirmCancellation}
-                disabled={cancelling}
+                disabled={cancelling || !cancelReason}
               >
-                {cancelling ? 'Cancelling...' : 'Yes, Cancel Ride'}
+                {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
               </button>
             </div>
           </div>
