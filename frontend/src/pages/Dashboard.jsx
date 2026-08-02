@@ -157,19 +157,42 @@ const Dashboard = () => {
     console.log('🔄 Toggle status:', { newStatus, hasToken: !!token, API_URL });
 
     try {
-      if (token) {
-        const response = await axios.put(
-          `${API_URL}/api/drivers/status`,
-          { isAvailable: newStatus === 'online' },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        console.log('✅ Status update response:', response.data);
-      } else {
-        console.warn('⚠️ No token found in localStorage');
+      if (!token) {
+        console.warn('⚠️ No token found - working in demo mode');
+        // Demo mode - allow status toggle without backend
+        setStatus(newStatus);
+        
+        if (newStatus === 'online') {
+          showNotif('success', '✅ You are now online (Demo mode). Finding rides…');
+          
+          // Start hours timer
+          const start = Date.now();
+          timerRef.current = setInterval(() => {
+            setTodayStats(s => ({ ...s, hours: +((Date.now() - start) / 3600000).toFixed(1) }));
+          }, 30000);
+          
+          // Use mock location for demo
+          setDriverPos(JAIPUR);
+          setMapCenter(JAIPUR);
+        } else {
+          showNotif('info', '⏸ You are now offline.');
+          clearInterval(timerRef.current);
+        }
+        
+        setLoading(false);
+        return;
       }
-
+      
+      const response = await axios.put(
+        `${API_URL}/api/drivers/status`,
+        { isAvailable: newStatus === 'online' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log('✅ Status update response:', response.data);
+      
+      // Only update status if API call succeeds
       setStatus(newStatus);
-
+      
       if (newStatus === 'online') {
         showNotif('success', '✅ You are now online. Finding rides…');
 

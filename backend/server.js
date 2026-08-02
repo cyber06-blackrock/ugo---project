@@ -131,7 +131,9 @@ server.listen(PORT, async () => {
   console.log(`📍  API: http://localhost:${PORT}/api`);
   console.log(`💫  Real-time: Socket.IO active`);
   
-  // Wait a bit for connection to resolve, then seed if using mock
+  // Seed mock database disabled - users must register manually
+  // Uncomment below to enable automatic seeding for testing
+  /*
   setTimeout(async () => {
     const { isUsingMockDb } = require('./config/db');
     if (isUsingMockDb && isUsingMockDb()) {
@@ -143,4 +145,5 @@ server.listen(PORT, async () => {
       }
     }
   }, 2000);
+  */
 });
