@@ -8,118 +8,45 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
     role: 'rider'
   });
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
-  // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
 
-  // Validate form
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
-    }
-
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    return newErrors;
-  };
-
-  // Handle signup
   const handleSignup = async (e) => {
     e.preventDefault();
     
-    const newErrors = validateForm();
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!formData.name || !formData.email || !formData.password) {
+      setError('Please fill all fields');
       return;
     }
 
     setLoading(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-      const signupData = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        password: formData.password,
-        role: formData.role
-      };
-
       const res = await fetch(`${API_URL}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signupData),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Signup failed');
 
-      if (!res.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-
-      // Store JWT token and user data
-      if (data.token) {
-        localStorage.setItem('ugo_token', data.token);
-        localStorage.setItem('ugo_user', JSON.stringify(data));
-      }
-
-      setSuccess(true);
-      setTimeout(() => {
-        navigate(formData.role === 'driver' ? '/dashboard' : '/ride');
-      }, 1500);
-
-    } catch (error) {
-      setErrors({ general: error.message });
+      localStorage.setItem('ugo_token', data.token);
+      localStorage.setItem('ugo_user', JSON.stringify(data));
+      navigate(formData.role === 'driver' ? '/dashboard' : '/ride');
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="auth-container">
-        <div className="auth-card auth-card--success">
-          <div className="auth-success-icon">✓</div>
-          <h2 className="auth-title">Welcome aboard!</h2>
-          <p className="auth-subtitle">Account created successfully</p>
-          <div className="success-spinner"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="auth-container">
@@ -129,107 +56,63 @@ const Signup = () => {
           <span className="auth-brand-name">Ugo</span>
         </div>
 
-        <h2 className="auth-title">Create Account</h2>
-        <p className="auth-subtitle">Join Ugo in a few seconds</p>
+        <h2 className="auth-title">Sign Up</h2>
 
-        {errors.general && (
-          <div className="auth-error" role="alert">
-            {errors.general}
-          </div>
-        )}
+        {error && <div className="auth-error">{error}</div>}
 
         <form onSubmit={handleSignup} className="auth-form">
-          {/* Name Field */}
-          <div className="form-group">
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Your full name"
-              autoComplete="name"
-              className="auth-input"
-            />
-            {errors.name && <p className="field-error">{errors.name}</p>}
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Name"
+            className="auth-input"
+            required
+          />
+
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            className="auth-input"
+            required
+          />
+
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            className="auth-input"
+            required
+          />
+
+          <div className="role-toggle">
+            <button
+              type="button"
+              className={`role-btn${formData.role === 'rider' ? ' role-btn--active' : ''}`}
+              onClick={() => setFormData({ ...formData, role: 'rider' })}
+            >
+              🚗 Rider
+            </button>
+            <button
+              type="button"
+              className={`role-btn${formData.role === 'driver' ? ' role-btn--active' : ''}`}
+              onClick={() => setFormData({ ...formData, role: 'driver' })}
+            >
+              🚕 Driver
+            </button>
           </div>
 
-          {/* Email Field */}
-          <div className="form-group">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              autoComplete="email"
-              className="auth-input"
-            />
-            {errors.email && <p className="field-error">{errors.email}</p>}
-          </div>
-
-          {/* Password Field */}
-          <div className="form-group">
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="At least 6 characters"
-              autoComplete="new-password"
-              className="auth-input"
-            />
-            {errors.password && <p className="field-error">{errors.password}</p>}
-          </div>
-
-          {/* Confirm Password Field */}
-          <div className="form-group">
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm password"
-              autoComplete="new-password"
-              className="auth-input"
-            />
-            {errors.confirmPassword && <p className="field-error">{errors.confirmPassword}</p>}
-          </div>
-
-          {/* Role Selection */}
-          <div className="form-group">
-            <div className="role-toggle">
-              <button
-                type="button"
-                className={`role-btn${formData.role === 'rider' ? ' role-btn--active' : ''}`}
-                onClick={() => setFormData(prev => ({ ...prev, role: 'rider' }))}
-              >
-                Rider
-              </button>
-              <button
-                type="button"
-                className={`role-btn${formData.role === 'driver' ? ' role-btn--active' : ''}`}
-                onClick={() => setFormData(prev => ({ ...prev, role: 'driver' }))}
-              >
-                Driver
-              </button>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="auth-button auth-button--ready"
-            disabled={loading}
-          >
-            {loading ? (
-              <><span className="auth-spinner" /> Creating account...</>
-            ) : (
-              'Sign Up'
-            )}
+          <button type="submit" className="auth-button" disabled={loading}>
+            {loading ? 'Creating...' : 'Sign Up'}
           </button>
         </form>
 
-        {/* Login Link */}
         <div className="auth-switch">
           Already have an account?
           <Link to="/login" className="auth-switch-link">Sign in</Link>

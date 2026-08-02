@@ -8,77 +8,39 @@ const Login = () => {
     email: '',
     password: ''
   });
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
 
-  // Validate form
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    }
-
-    return newErrors;
-  };
-
-  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     
-    const newErrors = validateForm();
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!formData.email || !formData.password) {
+      setError('Please fill all fields');
       return;
     }
 
     setLoading(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
       const res = await fetch(`${API_URL}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email.trim(),
-          password: formData.password
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Login failed');
 
-      if (!res.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // Store auth token and user data
       localStorage.setItem('ugo_token', data.token);
       localStorage.setItem('ugo_user', JSON.stringify(data));
-
-      // Navigate based on role
       navigate(data.role === 'driver' ? '/dashboard' : '/ride');
-
-    } catch (error) {
-      setErrors({ general: error.message });
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -93,58 +55,35 @@ const Login = () => {
         </div>
 
         <h2 className="auth-title">Welcome Back</h2>
-        <p className="auth-subtitle">Sign in to continue your journey</p>
 
-        {errors.general && (
-          <div className="auth-error" role="alert">
-            {errors.general}
-          </div>
-        )}
+        {error && <div className="auth-error">{error}</div>}
 
         <form onSubmit={handleLogin} className="auth-form">
-          {/* Email Field */}
-          <div className="form-group">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              autoComplete="email"
-              className="auth-input"
-            />
-            {errors.email && <p className="field-error">{errors.email}</p>}
-          </div>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            className="auth-input"
+            required
+          />
 
-          {/* Password Field */}
-          <div className="form-group">
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              autoComplete="current-password"
-              className="auth-input"
-            />
-            {errors.password && <p className="field-error">{errors.password}</p>}
-          </div>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            className="auth-input"
+            required
+          />
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="auth-button auth-button--ready"
-            disabled={loading}
-          >
-            {loading ? (
-              <><span className="auth-spinner" /> Signing in...</>
-            ) : (
-              'Sign In'
-            )}
+          <button type="submit" className="auth-button" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        {/* Signup Link */}
         <div className="auth-switch">
           Don't have an account?
           <Link to="/signup" className="auth-switch-link">Sign up</Link>
