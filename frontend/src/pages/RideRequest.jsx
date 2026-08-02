@@ -551,6 +551,12 @@ const RideRequest = () => {
                 ⚠️ Why do you want to cancel this ride?
               </p>
               
+              {!cancelReason && (
+                <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 500 }}>
+                  👆 Please select a reason to continue
+                </p>
+              )}
+              
               {/* Cancellation Reason Selection */}
               <div className="rr-cancel-reasons">
                 <label className={`rr-reason-option ${cancelReason === 'Driver is taking too long' ? 'rr-reason-selected' : ''}`}>
