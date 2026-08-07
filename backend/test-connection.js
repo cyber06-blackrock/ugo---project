@@ -1,61 +1,49 @@
-#!/usr/bin/env node
-/**
- * Test script to verify MongoDB connection
- * Run: node test-connection.js
- */
-
+// Quick MongoDB Atlas Connection Test
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const testConnection = async () => {
-  console.log('\n🔍 Testing MongoDB connection...\n');
+const uri = process.env.MONGO_URI;
 
-  const uri = process.env.MONGO_URI;
+console.log('🔍 Testing MongoDB Atlas Connection...\n');
+console.log('Connection String:', uri.replace(/:[^:]*@/, ':***@')); // Hide password
+console.log('\n🔄 Attempting connection...\n');
 
-  if (!uri) {
-    console.error('❌ MONGO_URI not found in .env');
-    console.log('\n📋 Please follow these steps:');
-    console.log('   1. Read: ../MONGODB_SETUP.md');
-    console.log('   2. Create a free MongoDB Atlas cluster');
-    console.log('   3. Copy your connection string');
-    console.log('   4. Update backend/.env with MONGO_URI=<your-connection-string>\n');
-    process.exit(1);
+mongoose.connect(uri, {
+  serverSelectionTimeoutMS: 15000,
+  socketTimeoutMS: 15000,
+})
+.then(() => {
+  console.log('✅ SUCCESS! MongoDB Atlas connected!');
+  console.log('📊 Connection details:');
+  console.log('   Host:', mongoose.connection.host);
+  console.log('   Database:', mongoose.connection.name);
+  console.log('   State:', mongoose.connection.readyState === 1 ? 'Connected' : 'Not Connected');
+  process.exit(0);
+})
+.catch((error) => {
+  console.log('❌ CONNECTION FAILED!\n');
+  console.log('Error Type:', error.name);
+  console.log('Error Message:', error.message);
+  console.log('\n🔍 Possible causes:');
+  
+  if (error.message.includes('ECONNREFUSED') || error.message.includes('querySrv')) {
+    console.log('   ❌ DNS Resolution Failed');
+    console.log('   ❌ Network/Firewall blocking MongoDB');
+    console.log('   ❌ ISP DNS not working properly');
+    console.log('\n💡 Solutions:');
+    console.log('   1. Change DNS to Google DNS (8.8.8.8)');
+    console.log('   2. Disable VPN/Proxy if enabled');
+    console.log('   3. Check firewall settings');
+    console.log('   4. Try from different network (mobile hotspot)');
+  } else if (error.message.includes('bad auth')) {
+    console.log('   ❌ Username or password incorrect');
+    console.log('\n💡 Solution: Check credentials in .env file');
+  } else if (error.message.includes('IP')) {
+    console.log('   ❌ IP address not whitelisted');
+    console.log('\n💡 Solution: Add 0.0.0.0/0 to Network Access in MongoDB Atlas');
+  } else {
+    console.log('   ❌ Unknown error:', error.message);
   }
-
-  console.log(`📍 Connection string (first 80 chars): ${uri.substring(0, 80)}...`);
-
-  try {
-    console.log('⏳ Connecting to MongoDB...');
-
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 5000,
-    });
-
-    console.log('✅ MongoDB connected successfully!\n');
-    console.log(`   Cluster: ${mongoose.connection.host}`);
-    console.log(`   Database: ${mongoose.connection.name}`);
-    console.log(`   State: ${mongoose.connection.readyState === 1 ? 'OPEN' : 'CLOSED'}\n`);
-
-    await mongoose.connection.close();
-    console.log('✅ Connection test passed! Ready to start backend.\n');
-
-  } catch (error) {
-    console.error('❌ Connection failed:\n');
-    console.error(`   Error: ${error.message}\n`);
-    
-    if (error.message.includes('getaddrinfo') || error.message.includes('ENOTFOUND')) {
-      console.log('💡 Tip: Check your internet connection and MONGO_URI format\n');
-    }
-    if (error.message.includes('authentication')) {
-      console.log('💡 Tip: Check your username and password in MONGO_URI\n');
-    }
-    if (error.message.includes('timeout')) {
-      console.log('💡 Tip: Check if your IP is whitelisted in MongoDB Atlas\n');
-    }
-
-    process.exit(1);
-  }
-};
-
-testConnection();
+  
+  process.exit(1);
+});

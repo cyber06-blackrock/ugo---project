@@ -18,36 +18,40 @@ const app = express();
 const server = http.createServer(app);
 
 // Setup Socket.io for Real-time tracking
-const io = new Server(server, {
-  cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? [
-          'https://frontend-iota-two-94.vercel.app',
-          'https://ugo-frontend.vercel.app',
-          'https://ugo-jaipur.vercel.app', 
-          /\.vercel\.app$/  // Allow all Vercel preview deployments
-        ]
-      : '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-  }
-});
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const allowedOrigins = [
+  FRONTEND_URL,
+  'https://frontend-iota-two-94.vercel.app',
+  'https://ugo-frontend.vercel.app',
+  'https://ugo-jaipur.vercel.app'
+].filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (process.env.NODE_ENV !== 'production') return true;
+  if (allowedOrigins.includes(origin)) return true;
+  return /https:\/\/(.*\.)?vercel\.app$/.test(origin);
+};
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+};
+
+const io = new Server(server, { cors: corsOptions });
 
 // Make io accessible to routes/controllers
 app.set('io', io);
 
 // Middleware
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? [
-        'https://frontend-iota-two-94.vercel.app',
-        'https://ugo-frontend.vercel.app',
-        'https://ugo-jaipur.vercel.app',
-        /\.vercel\.app$/
-      ]
-    : '*',
-  credentials: true
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Request logging middleware
