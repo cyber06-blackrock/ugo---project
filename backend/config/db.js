@@ -1,76 +1,51 @@
 const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const mockDb = require('./mockDb');
 
-let isUsingMockDb = true; // Start as true, will be false when MongoDB connects
-let connectionAttempts = 0;
+let mongoServer = null;
+let isUsingMemoryDb = false;
 
 const connectDB = async () => {
   const uri = process.env.MONGO_URI;
 
-  if (!uri) {
-    console.warn('⚠️   MONGO_URI is not set. Using mock database...');
-    isUsingMockDb = true;
-    return;
+  if (uri) {
+    try {
+      console.log('🔄 Connecting to MongoDB Atlas...');
+      const conn = await mongoose.connect(uri, {
+        serverSelectionTimeoutMS: 4000,
+        socketTimeoutMS: 4000,
+        retryWrites: true,
+      });
+
+      console.log(`✅ MongoDB Atlas connected: ${conn.connection.host}`);
+      console.log('💾 Using MongoDB Atlas for data storage');
+      isUsingMemoryDb = false;
+      return;
+    } catch (error) {
+      console.warn(`⚠️ MongoDB Atlas connection failed: ${error.message}`);
+      console.log('🔄 Initializing local MongoDB Server fallback...');
+    }
   }
 
   try {
-    console.log('🔄  Connecting to MongoDB Atlas...');
-    const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 8000,
-      socketTimeoutMS: 8000,
-      retryWrites: true,
-      maxPoolSize: 10,
-    });
-
-    console.log(`✅  MongoDB connected: ${conn.connection.host}`);
-    console.log('💾  Using MongoDB Atlas for data storage');
-    isUsingMockDb = false;
-    connectionAttempts = 0;
-
-    mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️   MongoDB disconnected. Attempting to reconnect…');
-      isUsingMockDb = true;
-    });
-
-    mongoose.connection.on('reconnected', () => {
-      console.log('✅  MongoDB reconnected');
-      isUsingMockDb = false;
-      connectionAttempts = 0;
-    });
-
-    mongoose.connection.on('error', (err) => {
-      console.warn('⚠️   MongoDB error:', err.message);
-      isUsingMockDb = true;
-    });
-
-  } catch (error) {
-    console.warn(`⚠️   MongoDB connection failed: ${error.message}`);
-    
-    // Only show detailed instructions on first attempt
-    if (connectionAttempts === 0) {
-      console.log('\n💡  Setup Instructions:');
-      console.log('   1. Go to: https://cloud.mongodb.com/v2');
-      console.log('   2. Login to your account');
-      console.log('   3. Click "Network Access" (left sidebar)');
-      console.log('   4. Click "+ Add IP Address"');
-      console.log('   5. Select "Allow Access from Anywhere"');
-      console.log('   6. Click "Confirm" and wait 1-2 minutes');
-      console.log('   7. Restart backend: npm run dev\n');
-      console.log('   For now, using in-memory mock database\n');
-    }
-    
-    connectionAttempts++;
-    isUsingMockDb = true;
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    const conn = await mongoose.connect(mongoUri);
+    isUsingMemoryDb = true;
+    console.log(`✅ MongoDB Memory Server active on: ${conn.connection.host}`);
+    console.log('💾 Using active MongoDB instance for all database operations');
+  } catch (memError) {
+    console.error('❌ Failed to start MongoDB Memory Server:', memError.message);
   }
 };
 
-// Auto-retry connection every 30 seconds if it's not connected
-const setupAutoReconnect = () => {
-  setInterval(() => {
-    if (isUsingMockDb && mongoose.connection.readyState === 0) {
-      connectDB();
-    }
-  }, 30000);
+const setupAutoReconnect = () => {};
+
+module.exports = { 
+  connectDB, 
+  setupAutoReconnect, 
+  mockDb, 
+  isUsingMockDb: () => false,
+  isUsingMemoryDb: () => isUsingMemoryDb 
 };
 
-module.exports = { connectDB, setupAutoReconnect, mockDb, isUsingMockDb: () => isUsingMockDb };

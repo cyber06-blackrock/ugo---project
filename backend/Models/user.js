@@ -51,7 +51,6 @@ const userSchema = new mongoose.Schema({
   licensePlate: { type: String, default: '' },
   rating:       { type: Number, default: 4.5, min: 1, max: 5 },
   totalRides:   { type: Number, default: 0 },
-  profilePhoto: { type: String, default: '' },
 }, { timestamps: true });
 
 // ── Hash password before saving (only if set/modified) ─────────────────────
